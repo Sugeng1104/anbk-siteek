@@ -1,0 +1,49 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="UTF-8">
+  <title>Token Ujian ANBK</title>
+  https://unpkg.com/@supabase/supabase-js@2script>
+</head>
+<body>
+
+<h2>MASUK UJIAN</h2>
+<p>Masukkan Token Ujian dari Proktor</p>
+
+<input id="token" placeholder="Token Ujian">
+<button onclick="cekToken()">Masuk</button>
+
+<p id="msg"></p>
+
+<script>
+const supabase = window.supabase.createClient(
+  "https://XXXX.supabase.co",
+  "PUBLIC_ANON_KEY"
+);
+
+async function cekToken() {
+  const token = document.getElementById('token').value;
+  const msg = document.getElementById('msg');
+
+  const { data, error } = await supabase
+    .from('sesi_ujian')
+    .select('*')
+    .eq('token', token)
+    .eq('aktif', true)
+    .single();
+
+  if (error) {
+    msg.innerText = 'Token salah atau belum aktif';
+    return;
+  }
+
+  // simpan sesi di localStorage
+  localStorage.setItem('sesi_ujian_id', data.id);
+  localStorage.setItem('ujian_id', data.ujian_id);
+
+  location.href = 'ujian.html';
+}
+</script>
+
+</body>
+</html>
