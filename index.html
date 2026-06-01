@@ -1,170 +1,147 @@
 <!DOCTYPE html>
 <html lang="id">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-  <title>CBT Sekolah | Sistem Ujian Online</title>
+  <meta charset="UTF-8">
+  <title>Login CBT / ANBK</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1">
 
-  <!-- Meta SEO -->
-  <meta name="description" content="Sistem Ujian Online CBT / ANBK berbasis Web">
-  <meta name="author" content="CBT Sekolah">
+  <!-- Supabase CDN -->
+  <script src="https://unpkg.com/@supabase/supabase-js@2"></script>
 
-  <!-- Style -->
   <style>
-    * {
-      box-sizing: border-box;
-      font-family: Arial, Helvetica, sans-serif;
-    }
-
     body {
       margin: 0;
-      background: #f4f6f8;
-      color: #333;
+      font-family: Arial, Helvetica, sans-serif;
+      background: #f2f2f2;
     }
 
-    header {
-      background: #1e40af;
-      color: white;
-      padding: 20px;
+    .container {
+      max-width: 400px;
+      margin: 80px auto;
+      background: #fff;
+      padding: 30px;
+      border-radius: 6px;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+    }
+
+    h1 {
       text-align: center;
-    }
-
-    header h1 {
-      margin: 0;
-      font-size: 28px;
-    }
-
-    header p {
-      margin: 5px 0 0;
-      font-size: 14px;
-      opacity: 0.9;
-    }
-
-    main {
-      max-width: 1000px;
-      margin: auto;
-      padding: 40px 20px;
-    }
-
-    .hero {
-      text-align: center;
-      margin-bottom: 40px;
-    }
-
-    .hero h2 {
-      font-size: 26px;
+      color: #0f4c81;
       margin-bottom: 10px;
     }
 
-    .hero p {
-      font-size: 16px;
-      color: #555;
-    }
-
-    .menu {
-      display: grid;
-      grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
-      gap: 20px;
-    }
-
-    .card {
-      background: white;
-      border-radius: 8px;
-      padding: 25px;
-      box-shadow: 0 2px 8px rgba(0,0,0,0.08);
+    p {
       text-align: center;
-    }
-
-    .card h3 {
-      margin-top: 0;
-      color: #1e40af;
-    }
-
-    .card p {
       font-size: 14px;
       color: #555;
-      margin-bottom: 20px;
     }
 
-    .card a {
-      display: inline-block;
-      padding: 10px 18px;
-      background: #1e40af;
-      color: white;
-      text-decoration: none;
-      border-radius: 5px;
+    input {
+      width: 100%;
+      padding: 10px;
+      margin-top: 12px;
       font-size: 14px;
+      border: 1px solid #ccc;
+      border-radius: 4px;
     }
 
-    .card a:hover {
-      background: #1e3a8a;
+    button {
+      width: 100%;
+      margin-top: 20px;
+      padding: 12px;
+      font-size: 15px;
+      background: #0f4c81;
+      color: #fff;
+      border: none;
+      border-radius: 4px;
+      cursor: pointer;
+    }
+
+    button:hover {
+      background: #09385f;
+    }
+
+    .msg {
+      margin-top: 15px;
+      text-align: center;
+      font-size: 13px;
+      color: red;
     }
 
     footer {
       text-align: center;
-      padding: 20px;
-      font-size: 13px;
+      margin-top: 20px;
+      font-size: 12px;
       color: #666;
-    }
-
-    footer span {
-      color: #1e40af;
-      font-weight: bold;
     }
   </style>
 </head>
+
 <body>
 
-  <!-- HEADER -->
-  <header>
-    <h1>SISTEM UJIAN ONLINE (CBT)</h1>
-    <p>PAS • TKA • ANBK • Ujian Sekolah</p>
-  </header>
+  <div class="container">
+    <h1>LOGIN CBT</h1>
+    <p>Asesmen Nasional Berbasis Komputer</p>
 
-  <!-- MAIN -->
-  <main>
-    <div class="hero">
-      <h2>Selamat Datang di Sistem CBT</h2>
-      <p>
-        Sistem Ujian Online berbasis web untuk pelaksanaan ujian sekolah
-        yang aman, cepat, dan profesional.
-      </p>
-    </div>
+    <input type="email" id="email" placeholder="Email" required>
+    <input type="password" id="password" placeholder="Password" required>
 
-    <div class="menu">
-      <!-- PROKTOR -->
-      <div class="card">
-        <h3>Login Proktor / Admin</h3>
-        <p>
-          Kelola bank soal, jadwal ujian, monitoring peserta, dan laporan nilai.
-        </p>
-        <a href="/login">Masuk Proktor</a>
-      </div>
+    <button onclick="login()">Masuk</button>
 
-      <!-- SISWA -->
-      <div class="card">
-        <h3>Login Peserta / Siswa</h3>
-        <p>
-          Masuk ujian, kerjakan soal, dan submit jawaban secara online.
-        </p>
-        <a href="/login">Masuk Peserta</a>
-      </div>
+    <div class="msg" id="msg"></div>
+  </div>
 
-      <!-- INFORMASI -->
-      <div class="card">
-        <h3>Informasi Ujian</h3>
-        <p>
-          Petunjuk pelaksanaan ujian, tata tertib, dan panduan peserta.
-        </p>
-        <a href="#info">Lihat Informasi</a>
-      </div>
-    </div>
-  </main>
-
-  <!-- FOOTER -->
   <footer>
-    © 2026 <span>CBT Sekolah</span> • Sistem Ujian Online
+    © 2026 Panitia CBT Sekolah
   </footer>
+
+  <script>
+    // 🔴 GANTI DENGAN DATA SUPABASE ANDA
+    const SUPABASE_URL = "https://XXXX.supabase.co"
+    const SUPABASE_ANON_KEY = "PUBLIC_ANON_KEY"
+
+    const supabase = window.supabase.createClient(
+      SUPABASE_URL,
+      SUPABASE_ANON_KEY
+    )
+
+    async function login() {
+      const email = document.getElementById('email').value
+      const password = document.getElementById('password').value
+      const msg = document.getElementById('msg')
+
+      msg.innerText = 'Memproses login...'
+
+      const { data, error } = await supabase.auth.signInWithPassword({
+        email,
+        password
+      })
+
+      if (error) {
+        msg.innerText = error.message
+        return
+      }
+
+      // Ambil role user
+      const { data: profile } = await supabase
+        .from('profiles')
+        .select('role')
+        .eq('id', data.user.id)
+        .single()
+
+      if (!profile) {
+        msg.innerText = 'Role pengguna tidak ditemukan'
+        return
+      }
+
+      // Redirect berdasarkan role
+      if (profile.role === 'proktor' || profile.role === 'admin') {
+        window.location.href = 'proktor.html'
+      } else {
+        window.location.href = 'token.html'
+      }
+    }
+  </script>
 
 </body>
 </html>
