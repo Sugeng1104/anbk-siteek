@@ -2,10 +2,10 @@
 <html lang="id">
 <head>
   <meta charset="UTF-8">
-  <title>Login CBT Proktor / Siswa</title>
+  <title>Login CBT</title>
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
-  <!-- ✅ SUPABASE CDN (BENAR) -->
+  <!-- ✅ SCRIPT TAG YANG BENAR -->
   <script src="https://unpkg.com/@supabase/supabase-js@2"></script>
 
   <style>
@@ -55,9 +55,14 @@
 </div>
 
 <script>
-  /* ==========================
-     KONFIGURASI SUPABASE
-  ========================== */
+  // =========================
+  // CEK SCRIPT JALAN ATAU TIDAK
+  // =========================
+  console.log("JS LOGIN JALAN");
+
+  // =========================
+  // KONFIGURASI SUPABASE
+  // =========================
   const SUPABASE_URL = "https://nbbjapiptpsszwxxafrt.supabase.co/rest/v1/";      // GANTI
   const SUPABASE_ANON_KEY = "sb_publishable_2d0f16q-n8waqycAYMG1lQ_vsssR2XK";         // GANTI
 
@@ -66,10 +71,12 @@
     SUPABASE_ANON_KEY
   );
 
-  /* ==========================
-     FUNGSI LOGIN
-  ========================== */
+  // =========================
+  // FUNGSI LOGIN
+  // =========================
   async function login() {
+    console.log("TOMBOL LOGIN DIKLIK");
+
     const email = document.getElementById("email").value;
     const password = document.getElementById("password").value;
     const msg = document.getElementById("msg");
@@ -77,8 +84,8 @@
     msg.innerText = "Memproses login...";
 
     const { data, error } = await supabase.auth.signInWithPassword({
-      email: email,
-      password: password
+      email,
+      password
     });
 
     if (error) {
@@ -86,19 +93,17 @@
       return;
     }
 
-    // Ambil role dari profiles
-    const { data: profile, error: pError } = await supabase
+    const { data: profile } = await supabase
       .from("profiles")
       .select("role")
       .eq("id", data.user.id)
       .single();
 
-    if (pError || !profile) {
+    if (!profile) {
       msg.innerText = "Role tidak ditemukan";
       return;
     }
 
-    // Redirect
     if (profile.role === "proktor" || profile.role === "admin") {
       window.location.href = "proktor.html";
     } else {
@@ -109,3 +114,4 @@
 
 </body>
 </html>
+``
