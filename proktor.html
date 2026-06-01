@@ -1,0 +1,243 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="UTF-8">
+  <title>Dashboard Proktor CBT</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+  <!-- Supabase CDN -->
+  <script src="https://unpkg.com/@supabase/supabase-js@2"></script>
+
+  <style>
+    body {
+      margin: 0;
+      font-family: Arial, Helvetica, sans-serif;
+      background: #f2f2f2;
+    }
+
+    header {
+      background: #0f4c81;
+      color: white;
+      padding: 15px 20px;
+    }
+
+    header h1 {
+      margin: 0;
+      font-size: 20px;
+    }
+
+    .container {
+      max-width: 1000px;
+      margin: auto;
+      padding: 20px;
+    }
+
+    .card {
+      background: white;
+      padding: 20px;
+      border-radius: 6px;
+      box-shadow: 0 1px 6px rgba(0,0,0,0.1);
+      margin-bottom: 20px;
+    }
+
+    .card h2 {
+      margin-top: 0;
+      color: #0f4c81;
+      font-size: 18px;
+      border-bottom: 1px solid #ddd;
+      padding-bottom: 8px;
+    }
+
+    input, button {
+      padding: 10px;
+      font-size: 14px;
+      margin-top: 8px;
+    }
+
+    button {
+      background: #0f4c81;
+      color: white;
+      border: none;
+      cursor: pointer;
+      border-radius: 4px;
+    }
+
+    button:hover {
+      background: #09385f;
+    }
+
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      font-size: 14px;
+    }
+
+    th, td {
+      border: 1px solid #ddd;
+      padding: 8px;
+      text-align: center;
+    }
+
+    th {
+      background: #eef5ff;
+    }
+
+    .logout {
+      float: right;
+      background: #d9534f;
+    }
+  </style>
+</head>
+
+<body>
+
+<header>
+  <h1>
+    DASHBOARD PROKTOR
+    <button class="logout" onclick="logout()">Logout</button>
+  </h1>
+</header>
+
+<div class="container">
+
+  <!-- INFORMASI USER -->
+  <div class="card">
+    <h2>Informasi Proktor</h2>
+    <p>Nama: <strong id="nama"></strong></p>
+    <p>Role: <strong id="role"></strong></p>
+  </div>
+
+  <!-- BUAT TOKEN UJIAN -->
+  <div class="card">
+    <h2>Token Ujian</h2>
+    <input id="token" placeholder="Contoh: ABC123">
+    <button onclick="buatToken()">Aktifkan Token</button>
+    <p id="tokenStatus"></p>
+  </div>
+
+  <!-- MONITORING PESERTA -->
+  <div class="card">
+    <h2>Monitoring Peserta</h2>
+    <table>
+      <thead>
+        <tr>
+          <th>Nama Siswa</th>
+          <th>Status</th>
+        </tr>
+      </thead>
+      <tbody id="peserta">
+        <tr><td colspan="2">Belum ada data</td></tr>
+      </tbody>
+    </table>
+  </div>
+
+</div>
+
+<script>
+/* ===============================
+   KONFIGURASI SUPABASE
+=============================== */
+const SUPABASE_URL = "https://XXXX.supabase.co";   // GANTI
+const SUPABASE_ANON_KEY = "PUBLIC_ANON_KEY";      // GANTI
+
+const supabase = supabasejs.createClient(
+  SUPABASE_URL,
+  SUPABASE_ANON_KEY
+);
+
+/* ===============================
+   CEK SESSION & ROLE
+=============================== */
+async function init() {
+  const { data } = await supabase.auth.getUser();
+  if (!data.user) {
+    location.href = 'login.html';
+    return;
+  }
+
+  const { data: profile } = await supabase
+    .from('profiles')
+    .select('nama, role')
+    .eq('id', data.user.id)
+    .single();
+
+  if (!profile || (profile.role !== 'proktor' && profile.role !== 'admin')) {
+    alert('Akses ditolak');
+    await supabase.auth.signOut();
+    location.href = 'login.html';
+    return;
+  }
+
+  document.getElementById('nama').innerText = profile.nama;
+  document.getElementById('role').innerText = profile.role;
+
+  loadPeserta();
+}
+
+init();
+
+/* ===============================
+   BUAT / AKTIFKAN TOKEN
+=============================== */
+async function buatToken() {
+  const token = document.getElementById('token').value;
+  const status = document.getElementById('tokenStatus');
+
+  if (!token) {
+    status.innerText = 'Token tidak boleh kosong';
+    return;
+  }
+
+  const { error } = await supabase
+    .from('sesi_ujian')
+    .insert({
+      ujian_id: null, // bisa disesuaikan nanti
+      token: token,
+      aktif: true
+    });
+
+  if (error) {
+    status.innerText = 'Gagal membuat token';
+    return;
+  }
+
+  status.innerText = 'Token aktif dan siap digunakan';
+}
+
+/* ===============================
+   LOAD DATA PESERTA
+=============================== */
+async function loadPeserta() {
+  const tbody = document.getElementById('peserta');
+
+  const { data } = await supabase
+    .from('peserta_ujian')
+    .select('id, profiles(nama)');
+
+  if (!data || data.length === 0) {
+    tbody.innerHTML = '<tr><td colspan="2">Belum ada peserta</td></tr>';
+    return;
+  }
+
+  tbody.innerHTML = '';
+  data.forEach(p => {
+    tbody.innerHTML += `
+      <tr>
+        <td>${p.profiles?.nama ?? '-'}</td>
+        <td>Aktif</td>
+      </tr>
+    `;
+  });
+}
+
+/* ===============================
+   LOGOUT
+=============================== */
+async function logout() {
+  await supabase.auth.signOut();
+  location.href = 'login.html';
+}
+</script>
+
+</body>
+</html>
