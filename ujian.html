@@ -1,0 +1,65 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="UTF-8">
+  <title>Ujian CBT</title>
+  https://unpkg.com/@supabase/supabase-js@2script>
+</head>
+<body>
+
+<h2>UJIAN CBT</h2>
+<p>Sisa Waktu: <span id="timer"></span></p>
+
+<p id="soal">Ibukota Indonesia adalah ...</p>
+
+<button onclick="jawab('A')">A. Jakarta</button>
+<button onclick="jawab('B')">B. Bandung</button>
+
+<script>
+const supabase = window.supabase.createClient(
+  "https://XXXX.supabase.co",
+  "PUBLIC_ANON_KEY"
+);
+
+// ===============================
+// TIMER ANBK (SERVER BASED)
+// ===============================
+let sisaDetik = 60 * 10; // 10 menit (contoh)
+
+function startTimer() {
+  const timer = document.getElementById('timer');
+
+  const interval = setInterval(() => {
+    const m = Math.floor(sisaDetik / 60);
+    const d = sisaDetik % 60;
+    timer.innerText = `${m}:${d < 10 ? '0'+d : d}`;
+
+    if (sisaDetik <= 0) {
+      clearInterval(interval);
+      alert('Waktu habis, ujian selesai');
+      location.href = 'index.html';
+    }
+    sisaDetik--;
+  }, 1000);
+}
+
+startTimer();
+
+// ===============================
+// SIMPAN JAWABAN
+// ===============================
+async function jawab(pilihan) {
+  const user = (await supabase.auth.getUser()).data.user;
+
+  await supabase.from('jawaban_siswa').insert({
+    peserta_ujian_id: 'UUID_PESERTA', // nanti dinamis
+    soal_id: 'UUID_SOAL',             // nanti dinamis
+    jawaban: pilihan
+  });
+
+  alert('Jawaban tersimpan');
+}
+</script>
+
+</body>
+</html>
