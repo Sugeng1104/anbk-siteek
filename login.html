@@ -1,0 +1,162 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="UTF-8">
+  <title>Login CBT / ANBK</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+  <!-- Supabase CDN -->
+  <script src="https://unpkg.com/@supabase/supabase-js@2"></script>
+
+  <style>
+    body {
+      margin: 0;
+      font-family: Arial, Helvetica, sans-serif;
+      background: #f2f2f2;
+      color: #333;
+    }
+
+    .container {
+      max-width: 420px;
+      margin: 80px auto;
+      background: #fff;
+      padding: 30px;
+      border-radius: 6px;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+    }
+
+    h1 {
+      text-align: center;
+      color: #0f4c81;
+      margin-bottom: 5px;
+    }
+
+    p.subtitle {
+      text-align: center;
+      font-size: 14px;
+      color: #555;
+      margin-bottom: 25px;
+    }
+
+    input {
+      width: 100%;
+      padding: 12px;
+      margin-top: 12px;
+      font-size: 14px;
+      border: 1px solid #ccc;
+      border-radius: 4px;
+    }
+
+    button {
+      width: 100%;
+      margin-top: 20px;
+      padding: 12px;
+      font-size: 15px;
+      background: #0f4c81;
+      color: white;
+      border: none;
+      border-radius: 4px;
+      cursor: pointer;
+      font-weight: bold;
+    }
+
+    button:hover {
+      background: #09385f;
+    }
+
+    .msg {
+      margin-top: 15px;
+      text-align: center;
+      font-size: 13px;
+      color: red;
+      min-height: 18px;
+    }
+
+    footer {
+      text-align: center;
+      margin-top: 20px;
+      font-size: 12px;
+      color: #666;
+    }
+  </style>
+</head>
+
+<body>
+
+  <div class="container">
+    <h1>LOGIN CBT</h1>
+    <p class="subtitle">Asesmen Nasional Berbasis Komputer</p>
+
+    <input type="email" id="email" placeholder="Email" required>
+    <input type="password" id="password" placeholder="Password" required>
+
+    <button onclick="login()">Masuk</button>
+
+    <div class="msg" id="msg"></div>
+  </div>
+
+  <footer>
+    © 2026 Panitia Ujian Sekolah
+  </footer>
+
+  <script>
+    // ===============================
+    // KONFIGURASI SUPABASE
+    // ===============================
+    const SUPABASE_URL = "https://XXXX.supabase.co";      // GANTI
+    const SUPABASE_ANON_KEY = "PUBLIC_ANON_KEY";         // GANTI
+
+    const supabase = supabasejs.createClient(
+      SUPABASE_URL,
+      SUPABASE_ANON_KEY
+    );
+
+    // ===============================
+    // LOGIN FUNCTION
+    // ===============================
+    async function login() {
+      const email = document.getElementById('email').value;
+      const password = document.getElementById('password').value;
+      const msg = document.getElementById('msg');
+
+      msg.style.color = 'black';
+      msg.innerText = 'Memproses login...';
+
+      const { data, error } = await supabase.auth.signInWithPassword({
+        email: email,
+        password: password
+      });
+
+      if (error) {
+        msg.style.color = 'red';
+        msg.innerText = error.message;
+        return;
+      }
+
+      // Ambil role user dari tabel profiles
+      const { data: profile, error: profileError } = await supabase
+        .from('profiles')
+        .select('role')
+        .eq('id', data.user.id)
+        .single();
+
+      if (profileError || !profile) {
+        msg.style.color = 'red';
+        msg.innerText = 'Role pengguna tidak ditemukan';
+        return;
+      }
+
+      // Redirect sesuai role
+      if (profile.role === 'admin' || profile.role === 'proktor') {
+        window.location.href = 'proktor.html';
+      } else if (profile.role === 'siswa') {
+        window.location.href = 'token.html';
+      } else {
+        msg.style.color = 'red';
+        msg.innerText = 'Role tidak dikenali';
+      }
+    }
+  </script>
+
+</body>
+</html>
