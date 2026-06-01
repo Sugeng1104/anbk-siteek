@@ -2,116 +2,158 @@
 <html lang="id">
 <head>
   <meta charset="UTF-8">
-  <title>Login CBT</title>
+  <title>Login CBT / ANBK</title>
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
-  <!-- ✅ SCRIPT TAG YANG BENAR -->
-  <script src="https://unpkg.com/@supabase/supabase-js@2"></script>
+  <!-- ✅ Supabase JS v2 (CDN RESMI) -->
+  <script src="https://unpkg.com/@supabase/supabase-js@2/dist/umd/supabase.min.js"></script>
 
   <style>
     body {
-      font-family: Arial, sans-serif;
+      margin: 0;
+      font-family: Arial, Helvetica, sans-serif;
       background: #f2f2f2;
+      color: #333;
     }
     .box {
       width: 360px;
       margin: 100px auto;
       padding: 25px;
-      background: white;
+      background: #fff;
       border-radius: 6px;
-      box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+      box-shadow: 0 2px 8px rgba(0,0,0,.1);
+    }
+    h3 {
+      margin-top: 0;
+      text-align: center;
+      color: #0f4c81;
     }
     input, button {
       width: 100%;
       padding: 10px;
       margin-top: 10px;
       font-size: 14px;
+      box-sizing: border-box;
     }
     button {
       background: #0f4c81;
-      color: white;
+      color: #fff;
       border: none;
       cursor: pointer;
+      font-weight: bold;
     }
+    button:hover { background: #09385f; }
     #msg {
       margin-top: 10px;
       font-size: 13px;
-      color: red;
       min-height: 16px;
+      color: #b00020;
+      text-align: center;
+    }
+    .hint {
+      margin-top: 8px;
+      font-size: 12px;
+      color: #555;
+      text-align: center;
     }
   </style>
 </head>
 
 <body>
 
-<div class="box">
-  <h3>LOGIN CBT</h3>
+  <div class="box">
+    <h3>LOGIN CBT</h3>
 
-  <input id="email" type="email" placeholder="Email">
-  <input id="password" type="password" placeholder="Password">
+    <input id="email" type="email" placeholder="Email" autocomplete="username">
+    <input id="password" type="password" placeholder="Password" autocomplete="current-password">
 
-  <button onclick="login()">Masuk</button>
-  <div id="msg"></div>
-</div>
+    <button id="btnLogin">Masuk</button>
+    <div id="msg"></div>
+    <div class="hint">Gunakan akun Proktor atau Siswa</div>
+  </div>
 
-<script>
-  // =========================
-  // CEK SCRIPT JALAN ATAU TIDAK
-  // =========================
-  console.log("JS LOGIN JALAN");
+  <script>
+    /* ===============================
+       DEBUG WAJIB (JANGAN DIHAPUS)
+    =============================== */
+    console.log('[LOGIN] Script ter-load');
 
-  // =========================
-  // KONFIGURASI SUPABASE
-  // =========================
-  const SUPABASE_URL = "https://nbbjapiptpsszwxxafrt.supabase.co/rest/v1/";      // GANTI
-  const SUPABASE_ANON_KEY = "sb_publishable_2d0f16q-n8waqycAYMG1lQ_vsssR2XK";         // GANTI
+    /* ===============================
+       KONFIGURASI SUPABASE (WAJIB BENAR)
+       - URL TANPA /rest/v1
+       - Key = anon public
+    =============================== */
+    const SUPABASE_URL = "https://nbbjapiptpsszwxxafrt.supabase.co"; // ✅ TANPA /rest/v1
+    const SUPABASE_ANON_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im5iYmphcGlwdHBzc3p3eHhhZnJ0Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODAyOTcxNDMsImV4cCI6MjA5NTg3MzE0M30.88TcUDb2JLcyR8HempOiGcaQ62yczLA721HZSbQ6Qvc";  // ✅ anon public (JWT)
 
-  const supabase = window.supabase.createClient(
-    SUPABASE_URL,
-    SUPABASE_ANON_KEY
-  );
+    const supabase = window.supabase.createClient(
+      SUPABASE_URL,
+      SUPABASE_ANON_KEY
+    );
 
-  // =========================
-  // FUNGSI LOGIN
-  // =========================
-  async function login() {
-    console.log("TOMBOL LOGIN DIKLIK");
+    /* ===============================
+       EVENT HANDLER (AMAN)
+    =============================== */
+    document.getElementById('btnLogin').addEventListener('click', login);
 
-    const email = document.getElementById("email").value;
-    const password = document.getElementById("password").value;
-    const msg = document.getElementById("msg");
+    async function login() {
+      console.log('[LOGIN] Tombol diklik');
 
-    msg.innerText = "Memproses login...";
+      const email = document.getElementById('email').value.trim();
+      const password = document.getElementById('password').value;
+      const msg = document.getElementById('msg');
 
-    const { data, error } = await supabase.auth.signInWithPassword({
-      email,
-      password
-    });
+      if (!email || !password) {
+        msg.style.color = '#b00020';
+        msg.innerText = 'Email dan password harus diisi';
+        return;
+      }
 
-    if (error) {
-      msg.innerText = error.message;
-      return;
+      msg.style.color = '#333';
+      msg.innerText = 'Memproses login…';
+
+      try {
+        // 1) Auth login
+        const { data, error } = await supabase.auth.signInWithPassword({
+          email,
+          password
+        });
+
+        if (error) {
+          console.error('[LOGIN] Auth error:', error);
+          msg.style.color = '#b00020';
+          msg.innerText = error.message || 'Login gagal';
+          return;
+        }
+
+        // 2) Ambil role dari tabel profiles
+        const { data: profile, error: pError } = await supabase
+          .from('profiles')
+          .select('role')
+          .eq('id', data.user.id)
+          .single();
+
+        if (pError || !profile) {
+          console.error('[LOGIN] Profile error:', pError);
+          msg.style.color = '#b00020';
+          msg.innerText = 'Role tidak ditemukan (cek tabel profiles)';
+          return;
+        }
+
+        // 3) Redirect sesuai role
+        if (profile.role === 'proktor' || profile.role === 'admin') {
+          window.location.href = 'proktor.html';
+        } else {
+          window.location.href = 'token.html';
+        }
+
+      } catch (e) {
+        console.error('[LOGIN] Exception:', e);
+        msg.style.color = '#b00020';
+        msg.innerText = 'Terjadi kesalahan. Cek Console.';
+      }
     }
-
-    const { data: profile } = await supabase
-      .from("profiles")
-      .select("role")
-      .eq("id", data.user.id)
-      .single();
-
-    if (!profile) {
-      msg.innerText = "Role tidak ditemukan";
-      return;
-    }
-
-    if (profile.role === "proktor" || profile.role === "admin") {
-      window.location.href = "proktor.html";
-    } else {
-      window.location.href = "token.html";
-    }
-  }
-</script>
+  </script>
 
 </body>
 </html>
-``
