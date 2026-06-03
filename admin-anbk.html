@@ -2,7 +2,7 @@
 <html lang="id">
 <head>
   <meta charset="UTF-8">
-  <title>Admin ANBK | Dashboard Utama</title>
+  <title>Admin ANBK | Dashboard Nasional</title>
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
   <style>
@@ -39,7 +39,7 @@
 
     aside{
       width:260px;
-      background:#fff;
+      background:#ffffff;
       border-right:1px solid #dcdcdc;
       padding:22px 0;
     }
@@ -112,6 +112,7 @@
       width:100%;
       border-collapse:collapse;
       font-size:14px;
+      margin-top:10px;
     }
     th,td{
       border:1px solid #ddd;
@@ -123,14 +124,18 @@
       font-weight:600;
     }
 
+    input, button{
+      padding:8px;
+      margin:4px 0;
+      font-size:13px;
+    }
+
     button{
-      padding:8px 14px;
       border:none;
       border-radius:6px;
       cursor:pointer;
       background:#1e3a8a;
       color:white;
-      font-size:13px;
     }
 
     footer{
@@ -171,11 +176,11 @@
       <div class="cards">
         <div class="card">
           <h4>Total Proktor</h4>
-          <div class="value" id="totalProktor">–</div>
+          <div class="value" id="totalProktor">-</div>
         </div>
         <div class="card">
           <h4>Peserta Aktif</h4>
-          <div class="value" id="pesertaAktif">–</div>
+          <div class="value" id="pesertaAktif">-</div>
         </div>
         <div class="card">
           <h4>Status Sistem</h4>
@@ -187,39 +192,52 @@
     <!-- MANAJEMEN PROKTOR -->
     <div id="proktor" class="section">
       <h2>Manajemen Proktor</h2>
+
+      <label>Filter Kecamatan</label><br>
+      <input id="filterKecamatan" placeholder="Nama Kecamatan">
+      <button onclick="loadProktor()">Tampilkan</button>
+
+      <hr>
+
+      <h3>Tambah Proktor (Satuan)</h3>
+      <input id="pEmail" placeholder="Email">
+      <input id="pPass" placeholder="Password">
+      <input id="pNama" placeholder="Nama Proktor">
+      <input id="pLembaga" placeholder="Kode Lembaga">
+      <input id="pKecamatan" placeholder="Kecamatan">
+      <br>
+      <button onclick="addProktor()">Tambah Proktor</button>
+
+      <hr>
+
+      <h3>Tambah Proktor Massal (Excel)</h3>
+      <input type="file" id="excelProktor" accept=".xlsx">
+      <button onclick="importProktor()">Import Excel</button>
+
       <table>
         <thead>
           <tr>
             <th>Email</th>
-            <th>Role</th>
+            <th>Nama</th>
+            <th>Kode Lembaga</th>
+            <th>Kecamatan</th>
           </tr>
         </thead>
-        <tbody id="listProktor">
-          <tr><td colspan="2">Memuat data...</td></tr>
-        </tbody>
+        <tbody id="tblProktor"></tbody>
       </table>
     </div>
 
     <!-- BANK SOAL -->
     <div id="banksoal" class="section">
-      <h2>Bank Soal (Import Excel)</h2>
-
-      <p>
-        Format Excel:<br>
-        <b>id | tipe | pertanyaan | A | B | C | D | jawaban | gambar</b><br>
-        tipe: <b>PG</b>, <b>MATCH</b>, <b>ESSAY</b><br>
-        gambar: path GitHub (contoh: <code>img/soal1.png</code>)
-      </p>
-
-      <input type="file" id="fileExcel" accept=".xlsx">
-      <br><br>
-      <button onclick="importSoal()">Import Excel</button>
+      <h2>Bank Soal</h2>
+      <p>Gunakan fitur ini untuk import soal massal (Excel). Soal mendukung PG, Cocokkan, dan Uraian.</p>
+      <p>Gambar soal disimpan di GitHub (path relatif, misal: <code>img/soal1.png</code>)</p>
     </div>
 
     <!-- LAPORAN -->
     <div id="laporan" class="section">
       <h2>Rekap & Laporan</h2>
-      <p>Fitur rekap nilai & export akan tersedia di tahap berikutnya.</p>
+      <p>Rekap nilai dan laporan lintas kecamatan tersedia di tahap berikutnya.</p>
     </div>
 
     <footer>
@@ -241,7 +259,7 @@ const email = localStorage.getItem("email");
 const role  = localStorage.getItem("role");
 
 if (!email || role !== "admin-anbk") {
-  alert("Akses khusus Admin ANBK");
+  alert("Akses hanya untuk Admin ANBK");
   location.href = "login.html";
 }
 document.getElementById("adminEmail").innerText = email;
@@ -255,7 +273,7 @@ function showSection(id){
   event.target.classList.add("active");
 }
 
-/* ================= DASHBOARD REAL ================= */
+/* ================= DASHBOARD ================= */
 fetch(API_URL + "?action=adminStats")
   .then(r=>r.json())
   .then(d=>{
@@ -265,19 +283,42 @@ fetch(API_URL + "?action=adminStats")
   });
 
 /* ================= PROKTOR ================= */
-fetch(API_URL + "?action=getProktor")
-  .then(r=>r.json())
-  .then(d=>{
-    const tb = document.getElementById("listProktor");
-    tb.innerHTML="";
-    d.data.forEach(p=>{
-      tb.innerHTML += `<tr><td>${p.email}</td><td>${p.role}</td></tr>`;
+function loadProktor(){
+  const kec = document.getElementById("filterKecamatan").value || "";
+  fetch(API_URL + "?action=getProktor&kecamatan=" + encodeURIComponent(kec))
+    .then(r=>r.json())
+    .then(d=>{
+      const tb = document.getElementById("tblProktor");
+      tb.innerHTML="";
+      d.data.forEach(p=>{
+        tb.innerHTML+=`
+          <tr>
+            <td>${p.email}</td>
+            <td>${p.nama}</td>
+            <td>${p.lembaga}</td>
+            <td>${p.kecamatan}</td>
+          </tr>`;
+      });
     });
-  });
+}
+loadProktor();
 
-/* ================= BANK SOAL ================= */
-function importSoal(){
-  const file = document.getElementById("fileExcel").files[0];
+function addProktor(){
+  fetch(API_URL,{
+    method:"POST",
+    body:JSON.stringify({
+      action:"addProktor",
+      email:pEmail.value,
+      password:pPass.value,
+      nama:pNama.value,
+      kode_lembaga:pLembaga.value,
+      kecamatan:pKecamatan.value
+    })
+  }).then(()=>{ alert("Proktor ditambahkan"); loadProktor(); });
+}
+
+function importProktor(){
+  const file = excelProktor.files[0];
   if(!file) return alert("Pilih file Excel");
 
   const reader = new FileReader();
@@ -288,11 +329,8 @@ function importSoal(){
 
     fetch(API_URL,{
       method:"POST",
-      body:JSON.stringify({
-        action:"importSoal",
-        data:data
-      })
-    }).then(()=>alert("Soal berhasil diimpor"));
+      body:JSON.stringify({action:"importProktor", data:data})
+    }).then(()=>{ alert("Import proktor selesai"); loadProktor(); });
   };
   reader.readAsBinaryString(file);
 }
