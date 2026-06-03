@@ -47,8 +47,8 @@ main{flex:1;padding:28px}
   gap:20px
 }
 .card{
-  background:#fff;border-radius:10px;padding:20px;
-  box-shadow:0 2px 6px rgba(0,0,0,.08)
+  background:#fff;border-radius:10px;
+  padding:20px;box-shadow:0 2px 6px rgba(0,0,0,.08)
 }
 .card .value{font-size:26px;font-weight:600;color:#1e3a8a}
 
@@ -58,30 +58,23 @@ th,td{border:1px solid #ddd;padding:8px;text-align:center;vertical-align:top}
 th{background:#f4f6fa}
 
 /* FORM */
-input,select,textarea{padding:6px;font-size:12px;width:auto}
-textarea{min-height:70px;width:100%}
+input,select,textarea{padding:6px;font-size:12px;width:100%}
+textarea{min-height:60px}
 button{
-  padding:6px 14px;font-size:12px;border:none;
-  border-radius:6px;background:#1e3a8a;color:#fff;
-  cursor:pointer;transition:.2s
+  padding:6px 14px;font-size:12px;
+  border:none;border-radius:6px;
+  background:#1e3a8a;color:#fff;
+  cursor:pointer
 }
-button:hover{background:#163172;transform:translateY(-1px)}
-button:active{transform:scale(.97)}
+button:hover{background:#163172}
 
-/* CONTROL */
-.control-row{
-  display:flex;
-  align-items:center;
-  gap:10px;
-  flex-wrap:wrap;
-  margin-top:12px
+.upload-btn{
+  margin-top:4px;
+  background:#059669;
+  font-size:11px
 }
-.indicator{display:flex;align-items:center;gap:6px;font-weight:bold}
-.dot{width:10px;height:10px;border-radius:50%}
-.dot.red{background:#b00020}
-.dot.green{background:#059669}
 
-/* LOADING */
+/* OVERLAY */
 .overlay{
   position:fixed;top:0;left:0;width:100%;height:100%;
   background:rgba(255,255,255,.8);
@@ -89,35 +82,17 @@ button:active{transform:scale(.97)}
   z-index:9999
 }
 .spinner{
-  width:60px;height:60px;border:6px solid #ccc;
-  border-top:6px solid #1e3a8a;border-radius:50%;
-  animation:spin 1s linear infinite
+  width:60px;height:60px;
+  border:6px solid #ccc;border-top:6px solid #1e3a8a;
+  border-radius:50%;animation:spin 1s linear infinite
 }
 @keyframes spin{to{transform:rotate(360deg)}}
-
-/* SUCCESS */
-.success-box{
-  position:fixed;top:50%;left:50%;
-  transform:translate(-50%,-50%);
-  background:#fff;padding:30px 40px;
-  border-radius:14px;
-  box-shadow:0 8px 30px rgba(0,0,0,.25);
-  display:none;text-align:center;z-index:10000
-}
-.success-box .check{font-size:52px;color:#059669}
 </style>
 </head>
 
 <body>
 
 <div class="overlay" id="overlay"><div class="spinner"></div></div>
-
-<div class="success-box" id="successBox">
-  <div class="check">✅</div>
-  <div style="margin-top:10px;font-weight:bold">Import Berhasil</div>
-</div>
-
-<audio id="tingSound" src="https://actions.google.com/sounds/v1/cartoon/clang_and_wobble.ogg"></audio>
 
 <header>
   <h1>ADMIN ANBK – DASHBOARD NASIONAL</h1>
@@ -174,25 +149,8 @@ button:active{transform:scale(.97)}
 <div id="banksoal" class="section">
 <h2>📘 Bank Soal ANBK</h2>
 
-<div class="control-row">
-  <select id="domainSoal">
-    <option value="">-- Pilih Domain Tes --</option>
-    <option value="literasi">Literasi</option>
-    <option value="numerasi">Numerasi</option>
-  </select>
-
-  <button onclick="toggleTes()">Aktifkan Tes</button>
-
-  <div id="indikator" class="indicator">
-    <span class="dot red"></span> Tidak Aktif
-  </div>
-</div>
-
-<!-- ✅ BARIS LURUS IMPORT + BUKA -->
-<div class="control-row">
-
+<div style="display:flex;gap:10px;align-items:center;flex-wrap:wrap">
   <input type="file" id="excelSoal" accept=".xlsx">
-
   <button onclick="importSoal()">Import Soal</button>
 
   <select id="filterDomain">
@@ -202,15 +160,19 @@ button:active{transform:scale(.97)}
   </select>
 
   <button onclick="bukaSoal()">Buka</button>
-
 </div>
 
 <table>
 <thead>
 <tr>
-  <th>No</th><th>Pertanyaan</th>
-  <th>A</th><th>B</th><th>C</th><th>D</th>
-  <th>Jawaban</th><th>Gambar Soal</th>
+  <th>No</th>
+  <th>Pertanyaan</th>
+  <th>A</th>
+  <th>B</th>
+  <th>C</th>
+  <th>D</th>
+  <th>Jawaban</th>
+  <th>Gambar Soal</th>
 </tr>
 </thead>
 <tbody id="tblSoal"></tbody>
@@ -223,9 +185,9 @@ button:active{transform:scale(.97)}
 <script src="https://cdn.jsdelivr.net/npm/xlsx/dist/xlsx.full.min.js"></script>
 <script>
 const API_URL="https://script.google.com/macros/s/AKfycbzhYhmgEliEpmgfyGGeM4iYnQSnLMrPJaRaPfws-wXy36NAXdJ5Z4AbLUDyzliW3Ios_w/exec";
+const overlay=document.getElementById("overlay");
 adminEmail.innerText=localStorage.getItem("email");
 
-/* MENU */
 function showSection(id){
   document.querySelectorAll(".section").forEach(s=>s.style.display="none");
   document.getElementById(id).style.display="block";
@@ -274,8 +236,8 @@ function importProktor(){
 
 /* BANK SOAL */
 function bukaSoal(){
-  const domain = filterDomain.value;
-  if(!domain){ alert("Pilih domain"); return; }
+  const domain=filterDomain.value;
+  if(!domain){alert("Pilih domain");return;}
 
   overlay.style.display="flex";
 
@@ -284,55 +246,78 @@ function bukaSoal(){
   .then(d=>{
     overlay.style.display="none";
     tblSoal.innerHTML="";
-    if(!d.data.length){
-      tblSoal.innerHTML="<tr><td colspan='8'>Tidak ada soal</td></tr>";
-      return;
-    }
+
     d.data.forEach((s,i)=>{
       tblSoal.innerHTML+=`
-      <tr>
-        <td>${i+1}</td>
-        <td>${s.pertanyaan}</td>
-        <td>${s.A||""}</td>
-        <td>${s.B||""}</td>
-        <td>${s.C||""}</td>
-        <td>${s.D||""}</td>
-        <td>${s.kunci||""}</td>
-        <td>${s.gambar?'<img src="'+s.gambar+'" width="60">':'-'}</td>
-      </tr>`;
+<tr>
+<td>${i+1}</td>
+<td>${s.pertanyaan}</td>
+
+${["A","B","C","D"].map(k=>`
+<td>
+  ${s[k]||""}
+  <input type="file" class="upload-btn"
+         onchange="uploadGambar(this)">
+</td>`).join("")}
+
+<td>${s.kunci||""}</td>
+
+<td>
+  ${s.gambar?'<img src="'+s.gambar+'" width="60"><br>':'-'}
+  <input type="file" class="upload-btn"
+         onchange="uploadGambar(this)">
+</td>
+</tr>`;
     });
   });
 }
 
-function importSoal(){
-  const f = excelSoal.files[0];
-  if(!f){ alert("Pilih file Excel"); return; }
+function uploadGambar(input){
+  const file=input.files[0];
+  if(!file) return;
 
   overlay.style.display="flex";
 
-  const r = new FileReader();
-  r.onload = e=>{
-    const wb = XLSX.read(e.target.result,{type:"binary"});
-    const data = XLSX.utils.sheet_to_json(wb.Sheets[wb.SheetNames[0]]);
+  const r=new FileReader();
+  r.onload=e=>{
+    fetch(API_URL,{
+      method:"POST",
+      body:JSON.stringify({
+        action:"uploadImage",
+        filename:file.name,
+        base64:e.target.result.split(",")[1]
+      })
+    })
+    .then(r=>r.json())
+    .then(res=>{
+      overlay.style.display="none";
+      if(res.success){
+        alert("Upload berhasil:\n"+res.url);
+      }else{
+        alert("Upload gagal");
+      }
+    });
+  };
+  r.readAsDataURL(file);
+}
 
+function importSoal(){
+  const f=excelSoal.files[0];
+  if(!f){alert("Pilih file");return;}
+
+  overlay.style.display="flex";
+
+  const r=new FileReader();
+  r.onload=e=>{
+    const wb=XLSX.read(e.target.result,{type:"binary"});
+    const data=XLSX.utils.sheet_to_json(wb.Sheets[wb.SheetNames[0]]);
     fetch(API_URL,{method:"POST",body:JSON.stringify({action:"importSoal",data})})
     .then(()=>{
       overlay.style.display="none";
-      successBox.style.display="block";
-      tingSound.play();
-      setTimeout(()=>{successBox.style.display="none";},1500);
+      bukaSoal();
     });
   };
   r.readAsBinaryString(f);
-}
-
-/* TES */
-let aktif=false;
-function toggleTes(){
-  aktif=!aktif;
-  indikator.innerHTML = aktif
-    ? '<span class="dot green"></span> Aktif'
-    : '<span class="dot red"></span> Tidak Aktif';
 }
 
 function logout(){
