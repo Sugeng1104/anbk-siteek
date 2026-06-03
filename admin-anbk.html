@@ -7,29 +7,66 @@
 
   <style>
     *{box-sizing:border-box}
-    body{margin:0;font-family:"Segoe UI",Arial,sans-serif;background:#eef1f5;color:#333}
-    header{background:#1e3a8a;color:white;padding:18px 28px;display:flex;justify-content:space-between;align-items:center}
+    body{
+      margin:0;
+      font-family:"Segoe UI", Arial, sans-serif;
+      background:#eef1f5;
+      color:#333;
+    }
+
+    header{
+      background:#1e3a8a;
+      color:white;
+      padding:18px 28px;
+      display:flex;
+      justify-content:space-between;
+      align-items:center;
+    }
     header h1{margin:0;font-size:20px}
     header .user{font-size:13px;opacity:.9}
 
     .layout{display:flex;min-height:calc(100vh - 64px)}
-    aside{width:260px;background:#fff;border-right:1px solid #ddd;padding:22px 0}
-    aside h3{margin:0 24px 12px;font-size:12px;color:#666;text-transform:uppercase}
-    aside a{display:block;padding:12px 24px;color:#333;text-decoration:none;cursor:pointer}
-    aside a.active,aside a:hover{background:#eef5ff;color:#1e3a8a;font-weight:600}
+
+    aside{
+      width:260px;background:#fff;border-right:1px solid #ddd;padding:22px 0
+    }
+    aside h3{
+      margin:0 24px 12px;font-size:12px;color:#666;text-transform:uppercase
+    }
+    aside a{
+      display:block;padding:12px 24px;color:#333;
+      text-decoration:none;cursor:pointer
+    }
+    aside a.active,aside a:hover{
+      background:#eef5ff;color:#1e3a8a;font-weight:600
+    }
 
     main{flex:1;padding:28px}
-    .cards{display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:20px}
-    .card{background:#fff;border-radius:10px;padding:20px;box-shadow:0 2px 6px rgba(0,0,0,.08)}
+
+    .cards{
+      display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));
+      gap:20px
+    }
+    .card{
+      background:#fff;border-radius:10px;padding:20px;
+      box-shadow:0 2px 6px rgba(0,0,0,.08)
+    }
     .card .value{font-size:26px;font-weight:600;color:#1e3a8a}
 
-    .section{background:#fff;border-radius:10px;padding:20px;box-shadow:0 2px 6px rgba(0,0,0,.08);margin-top:20px;display:none}
+    .section{
+      background:#fff;border-radius:10px;padding:20px;
+      box-shadow:0 2px 6px rgba(0,0,0,.08);
+      margin-top:20px;display:none
+    }
+
     table{width:100%;border-collapse:collapse;margin-top:10px}
     th,td{border:1px solid #ddd;padding:8px;text-align:center}
     th{background:#f4f6fa}
 
     input,select,button{padding:8px;margin:4px;font-size:13px}
-    button{background:#1e3a8a;color:white;border:none;border-radius:6px;cursor:pointer}
+    button{
+      background:#1e3a8a;color:white;border:none;border-radius:6px;cursor:pointer
+    }
 
     .status{font-weight:bold}
     .green{color:#059669}
@@ -45,6 +82,8 @@
 </header>
 
 <div class="layout">
+
+  <!-- SIDEBAR -->
   <aside>
     <h3>Menu Admin</h3>
     <a class="active" onclick="showSection('dashboard')">Dashboard</a>
@@ -55,37 +94,49 @@
 
   <main>
 
-    <!-- DASHBOARD -->
+    <!-- DASHBOARD (TIDAK DIUBAH) -->
     <div id="dashboard" class="section" style="display:block">
       <div class="cards">
-        <div class="card"><h4>Total Proktor</h4><div class="value" id="totalProktor">-</div></div>
-        <div class="card"><h4>Peserta Aktif</h4><div class="value" id="pesertaAktif">-</div></div>
+        <div class="card">
+          <h4>Total Proktor</h4>
+          <div class="value" id="totalProktor">-</div>
+        </div>
+        <div class="card">
+          <h4>Peserta Aktif</h4>
+          <div class="value" id="pesertaAktif">-</div>
+        </div>
       </div>
     </div>
 
-    <!-- PROKTOR (tetap seperti sebelumnya, tidak diubah) -->
+    <!-- MANAJEMEN PROKTOR (TIDAK DIUBAH) -->
     <div id="proktor" class="section">
       <h2>Manajemen Proktor</h2>
+
       <input id="filterKecamatan" placeholder="Filter Kecamatan">
       <button onclick="loadProktor()">Tampilkan</button>
+
       <table>
-        <thead><tr><th>Email</th><th>Nama</th><th>Lembaga</th><th>Kecamatan</th></tr></thead>
+        <thead>
+          <tr>
+            <th>Email</th><th>Nama</th><th>Lembaga</th><th>Kecamatan</th>
+          </tr>
+        </thead>
         <tbody id="tblProktor"></tbody>
       </table>
     </div>
 
-    <!-- BANK SOAL -->
+    <!-- ✅ BANK SOAL (DITAMBAHKAN, ISOLATED) -->
     <div id="banksoal" class="section">
       <h2>Bank Soal ANBK</h2>
 
-      <select id="domain">
+      <select id="domainSoal">
         <option value="">-- Pilih Domain --</option>
         <option value="literasi">Literasi</option>
         <option value="numerasi">Numerasi</option>
       </select>
 
       <button onclick="toggleTes()">Aktifkan Tes</button>
-      <span id="indikator" class="status red">● Tidak Aktif</span>
+      <span id="indikatorTes" class="status red">● Tidak Aktif</span>
 
       <hr>
 
@@ -94,7 +145,9 @@
 
       <table>
         <thead>
-          <tr><th>No</th><th>Pertanyaan</th><th>Jawaban</th><th>Gambar</th></tr>
+          <tr>
+            <th>No</th><th>Pertanyaan</th><th>Jawaban</th><th>Gambar</th>
+          </tr>
         </thead>
         <tbody id="tblSoal"></tbody>
       </table>
@@ -108,6 +161,7 @@ https://cdn.jsdelivr.net/npm/xlsx/dist/xlsx.full.min.jsscript>
 <script>
 const API_URL="https://script.google.com/macros/s/AKfycbzhYhmgEliEpmgfyGGeM4iYnQSnLMrPJaRaPfws-wXy36NAXdJ5Z4AbLUDyzliW3Ios_w/exec";
 
+/* SESSION */
 const email=localStorage.getItem("email");
 const role=localStorage.getItem("role");
 if(role!=="admin-anbk") location.href="login.html";
@@ -121,7 +175,7 @@ function showSection(id){
   event.target.classList.add("active");
 }
 
-/* DASHBOARD */
+/* DASHBOARD (ASLI) */
 fetch(API_URL+"?action=adminStats")
 .then(r=>r.json()).then(d=>{
   if(d.success){
@@ -130,16 +184,35 @@ fetch(API_URL+"?action=adminStats")
   }
 });
 
-/* BANK SOAL */
+/* PROKTOR (ASLI) */
+function loadProktor(){
+  const kec=filterKecamatan.value||"";
+  fetch(API_URL+"?action=getProktor&kecamatan="+encodeURIComponent(kec))
+  .then(r=>r.json()).then(d=>{
+    tblProktor.innerHTML="";
+    d.data.forEach(p=>{
+      tblProktor.innerHTML+=`
+      <tr>
+        <td>${p.email}</td>
+        <td>${p.nama}</td>
+        <td>${p.lembaga}</td>
+        <td>${p.kecamatan}</td>
+      </tr>`;
+    });
+  });
+}
+loadProktor();
+
+/* ✅ BANK SOAL */
 let aktif=false;
 function toggleTes(){
   aktif=!aktif;
-  indikator.innerText=aktif?"● Aktif":"● Tidak Aktif";
-  indikator.className="status "+(aktif?"green":"red");
+  indikatorTes.innerText=aktif?"● Aktif":"● Tidak Aktif";
+  indikatorTes.className="status "+(aktif?"green":"red");
 }
 
 function loadSoal(){
-  fetch(API_URL+"?action=getBankSoal&domain="+domain.value)
+  fetch(API_URL+"?action=getBankSoal&domain="+domainSoal.value)
   .then(r=>r.json()).then(d=>{
     tblSoal.innerHTML="";
     d.data.forEach((s,i)=>{
@@ -153,7 +226,7 @@ function loadSoal(){
     });
   });
 }
-domain.onchange=loadSoal;
+domainSoal.onchange=loadSoal;
 
 function importSoal(){
   const f=excelSoal.files[0];
@@ -162,8 +235,10 @@ function importSoal(){
     const wb=XLSX.read(e.target.result,{type:"binary"});
     const ws=wb.Sheets[wb.SheetNames[0]];
     const data=XLSX.utils.sheet_to_json(ws);
-    fetch(API_URL,{method:"POST",body:JSON.stringify({action:"importSoal",data})})
-    .then(()=>{alert("Import berhasil");loadSoal();});
+    fetch(API_URL,{
+      method:"POST",
+      body:JSON.stringify({action:"importSoal",data})
+    }).then(()=>{alert("Import berhasil");loadSoal();});
   };
   r.readAsBinaryString(f);
 }
