@@ -115,13 +115,13 @@
 </div>
 
 <script>
-/* ================= CONFIG ================= */
-const API_URL = "https://script.google.com/macros/s/AKfycbwAMuLgi9u9v7GVUypyemAOyQgrSRHjxGXgxr578dJXYDluSDK0NbpVjamilFVEL1M/exec"; // WAJIB GANTI
+const API_URL = "https://script.google.com/macros/s/AKfycbwAMuLgi9u9v7GVUypyemAOyQgrSRHjxGXgxr578dJXYDluSDK0NbpVjamilFVEL1M/exec"; // HARUS /exec
+
 document.getElementById("btnLogin").onclick = login;
 
 async function login(){
-  const email = emailInput().value.trim();
-  const password = passwordInput().value;
+  const email = document.getElementById("email").value.trim();
+  const password = document.getElementById("password").value;
   const msg = document.getElementById("msg");
   const btn = document.getElementById("btnLogin");
 
@@ -135,11 +135,15 @@ async function login(){
 
   try{
     const res = await fetch(API_URL,{
-      method:"POST",
-      body:JSON.stringify({
-        action:"login",
-        email:email,
-        password:password
+      method: "POST",
+      mode: "cors",                       // ✅ WAJIB
+      headers: {
+        "Content-Type": "application/json" // ✅ WAJIB
+      },
+      body: JSON.stringify({
+        action: "login",
+        email: email,
+        password: password
       })
     });
 
@@ -152,10 +156,10 @@ async function login(){
     }
 
     // ✅ SIMPAN SESSION
-    localStorage.setItem("email",email);
-    localStorage.setItem("role",json.role);
+    localStorage.setItem("email", email);
+    localStorage.setItem("role", json.role);
 
-    // ✅ VALIDASI ROLE
+    // ✅ REDIRECT BERDASARKAN ROLE
     if(json.role === "proktor"){
       location.href = "proktor.html";
       return;
@@ -170,15 +174,11 @@ async function login(){
     btn.disabled = false;
 
   }catch(err){
-    console.error(err);
-    msg.innerText = "Gagal koneksi ke server";
+    console.error("FETCH ERROR:", err);
+    msg.innerText = "Gagal koneksi ke server (cek Apps Script)";
     btn.disabled = false;
   }
 }
-
-/* helper */
-function emailInput(){return document.getElementById("email")}
-function passwordInput(){return document.getElementById("password")}
 </script>
 
 </body>
