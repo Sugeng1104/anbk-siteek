@@ -1,10 +1,35 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>Ujian CBT</title>
+</head>
+<body>
+
 <h3>UJIAN CBT</h3>
+<p>Waktu tersisa: <span id="timer"></span></p>
 <div id="soal"></div>
 
 <script>
-const API_URL = "PASTE_URL_APPS_SCRIPT";
+const API = "PASTE_URL_APPS_SCRIPT";
+const EMAIL = localStorage.getItem("email");
+let waktu = 300; // 5 menit
 
-fetch(API_URL, {
+function startTimer() {
+  const t = document.getElementById("timer");
+  const interval = setInterval(() => {
+    let m = Math.floor(waktu / 60);
+    let s = waktu % 60;
+    t.innerText = `${m}:${s < 10 ? "0"+s : s}`;
+    waktu--;
+
+    if (waktu < 0) {
+      clearInterval(interval);
+      submitNilai();
+    }
+  }, 1000);
+}
+
+fetch(API, {
   method: "POST",
   body: JSON.stringify({ action: "getSoal" })
 })
@@ -14,13 +39,44 @@ fetch(API_URL, {
   data.soal.forEach(s => {
     html += `
       <p>${s.pertanyaan}</p>
-      <button>A. ${s.A}</button>
-      <button>B. ${s.B}</button>
-      <button>C. ${s.C}</button>
-      <button>D. ${s.D}</button>
+      <button onclick="jawab(${s.id},'A')">A. ${s.A}</button>
+      <button onclick="jawab(${s.id},'B')">B. ${s.B}</button>
+      <button onclick="jawab(${s.id},'C')">C. ${s.C}</button>
+      <button onclick="jawab(${s.id},'D')">D. ${s.D}</button>
       <hr>
     `;
   });
   soal.innerHTML = html;
+  startTimer();
 });
+
+function jawab(id, jwb) {
+  fetch(API, {
+    method: "POST",
+    body: JSON.stringify({
+      action: "jawab",
+      email: EMAIL,
+      soal_id: id,
+      jawaban: jwb
+    })
+  });
+}
+
+function submitNilai() {
+  fetch(API, {
+    method: "POST",
+    body: JSON.stringify({
+      action: "nilai",
+      email: EMAIL
+    })
+  })
+  .then(r => r.json())
+  .then(res => {
+    alert("Ujian selesai. Nilai Anda: " + res.nilai);
+    location.href = "index.html";
+  });
+}
 </script>
+
+</body>
+</html>
