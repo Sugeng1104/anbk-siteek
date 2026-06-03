@@ -6,51 +6,182 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
 <style>
+/* ===== RESET & BASE ===== */
 *{box-sizing:border-box}
-body{margin:0;font-family:"Segoe UI",Arial,sans-serif;background:#eef1f5;color:#333}
-header{background:#1e3a8a;color:white;padding:18px 28px;display:flex;justify-content:space-between;align-items:center}
+body{
+  margin:0;
+  font-family:"Segoe UI",Arial,sans-serif;
+  background:#eef1f5;
+  color:#333;
+}
+
+/* ===== HEADER ===== */
+header{
+  background:#1e3a8a;
+  color:white;
+  padding:18px 28px;
+  display:flex;
+  justify-content:space-between;
+  align-items:center
+}
 header h1{margin:0;font-size:20px}
 header .user{font-size:13px;opacity:.9}
 
+/* ===== LAYOUT ===== */
 .layout{display:flex;min-height:calc(100vh - 64px)}
 
-aside{width:260px;background:#fff;border-right:1px solid #ddd;padding:22px 0}
-aside h3{margin:0 24px 12px;font-size:12px;color:#666;text-transform:uppercase}
-aside a{display:block;padding:12px 24px;color:#333;text-decoration:none;cursor:pointer}
-aside a.active,aside a:hover{background:#eef5ff;color:#1e3a8a;font-weight:600}
+/* ===== SIDEBAR ===== */
+aside{
+  width:260px;
+  background:#fff;
+  border-right:1px solid #ddd;
+  padding:22px 0
+}
+aside h3{
+  margin:0 24px 12px;
+  font-size:12px;
+  color:#666;
+  text-transform:uppercase
+}
+aside a{
+  display:block;
+  padding:12px 24px;
+  color:#333;
+  text-decoration:none;
+  cursor:pointer
+}
+aside a.active,
+aside a:hover{
+  background:#eef5ff;
+  color:#1e3a8a;
+  font-weight:600
+}
 
+/* ===== MAIN ===== */
 main{flex:1;padding:28px}
 
-.cards{display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:20px}
-.card{background:#fff;border-radius:10px;padding:20px;box-shadow:0 2px 6px rgba(0,0,0,.08)}
+/* ===== DASHBOARD ===== */
+.cards{
+  display:grid;
+  grid-template-columns:repeat(auto-fit,minmax(220px,1fr));
+  gap:20px
+}
+.card{
+  background:#fff;
+  border-radius:10px;
+  padding:20px;
+  box-shadow:0 2px 6px rgba(0,0,0,.08)
+}
+.card h4{margin:0 0 6px;font-size:14px;color:#666}
 .card .value{font-size:26px;font-weight:600;color:#1e3a8a}
 
-.section{background:#fff;border-radius:10px;padding:20px;box-shadow:0 2px 6px rgba(0,0,0,.08);margin-top:20px;display:none}
+/* ===== SECTION ===== */
+.section{
+  background:#fff;
+  border-radius:10px;
+  padding:20px;
+  box-shadow:0 2px 6px rgba(0,0,0,.08);
+  margin-top:20px;
+  display:none
+}
+.section h2{
+  margin:0 0 10px;
+  font-size:18px;
+  color:#1e3a8a
+}
 
-table{width:100%;border-collapse:collapse;margin-top:10px}
-th,td{border:1px solid #ddd;padding:6px;text-align:center;vertical-align:top}
-th{background:#f4f6fa}
+/* ===== TABLE UMUM ===== */
+table{
+  width:100%;
+  border-collapse:collapse;
+  margin-top:10px;
+  font-size:13px
+}
+th,td{
+  border:1px solid #ddd;
+  padding:8px;
+  text-align:center
+}
+th{
+  background:#f4f6fa;
+  font-weight:600
+}
 
-textarea,input,select,button{font-size:12px;padding:6px;width:100%}
-button{background:#1e3a8a;color:white;border:none;border-radius:6px;cursor:pointer;width:auto}
+/* ===== FORM ===== */
+input,select,textarea{
+  padding:6px;
+  font-size:13px;
+  width:100%
+}
+button{
+  padding:8px 14px;
+  font-size:13px;
+  background:#1e3a8a;
+  color:white;
+  border:none;
+  border-radius:6px;
+  cursor:pointer
+}
 
+/* ===== STATUS ===== */
 .status{font-weight:bold}
 .green{color:#059669}
 .red{color:#b00020}
 
-/* SPINNER */
+/* ===== BANK SOAL (EDITOR MODE TERISOLASI) ===== */
+#banksoal{
+  background:#fafbff;
+}
+#banksoal h2{
+  color:#0f3f7a
+}
+#banksoal table{
+  font-size:12px;
+  table-layout:fixed
+}
+#banksoal th{
+  background:#e9edf5;
+  white-space:nowrap
+}
+#banksoal td{
+  vertical-align:top
+}
+#banksoal textarea{
+  min-height:60px;
+  resize:vertical
+}
+#banksoal td input,
+#banksoal td select{
+  max-width:140px;
+  font-size:12px
+}
+#banksoal th:nth-child(2),
+#banksoal td:nth-child(2){
+  width:240px
+}
+#banksoal img{
+  border:1px solid #ccc;
+  border-radius:4px;
+  margin-bottom:4px
+}
+
+/* ===== SPINNER ===== */
 .overlay{
-  position:fixed;top:0;left:0;width:100%;height:100%;
-  background:rgba(255,255,255,.7);
-  display:none;align-items:center;justify-content:center;
-  z-index:9999;
+  position:fixed;
+  top:0;left:0;
+  width:100%;height:100%;
+  background:rgba(255,255,255,.75);
+  display:none;
+  align-items:center;
+  justify-content:center;
+  z-index:9999
 }
 .spinner{
   width:60px;height:60px;
   border:6px solid #ccc;
   border-top:6px solid #1e3a8a;
   border-radius:50%;
-  animation:spin 1s linear infinite;
+  animation:spin 1s linear infinite
 }
 @keyframes spin{to{transform:rotate(360deg)}}
 </style>
@@ -80,18 +211,27 @@ button{background:#1e3a8a;color:white;border:none;border-radius:6px;cursor:point
 <!-- DASHBOARD -->
 <div id="dashboard" class="section" style="display:block">
   <div class="cards">
-    <div class="card"><h4>Total Proktor</h4><div class="value" id="totalProktor">-</div></div>
-    <div class="card"><h4>Peserta Aktif</h4><div class="value" id="pesertaAktif">-</div></div>
+    <div class="card">
+      <h4>Total Proktor</h4>
+      <div class="value" id="totalProktor">-</div>
+    </div>
+    <div class="card">
+      <h4>Peserta Aktif</h4>
+      <div class="value" id="pesertaAktif">-</div>
+    </div>
   </div>
 </div>
 
-<!-- PROKTOR (UTUH) -->
+<!-- PROKTOR -->
 <div id="proktor" class="section">
   <h2>Manajemen Proktor</h2>
-  <input id="filterKecamatan" placeholder="Filter Kecamatan">
-  <button onclick="loadProktor()">Tampilkan</button>
 
-  <h3>Tambah Proktor</h3>
+  <div style="margin-bottom:10px">
+    <input id="filterKecamatan" placeholder="Filter Kecamatan" style="max-width:200px">
+    <button onclick="loadProktor()">Tampilkan</button>
+  </div>
+
+  <h3 style="font-size:15px">Tambah Proktor</h3>
   <input id="pEmail" placeholder="Email">
   <input id="pPass" placeholder="Password">
   <input id="pNama" placeholder="Nama">
@@ -99,49 +239,53 @@ button{background:#1e3a8a;color:white;border:none;border-radius:6px;cursor:point
   <input id="pKecamatan" placeholder="Kecamatan">
   <button onclick="addProktor()">Tambah</button>
 
-  <h3>Import Proktor (Excel)</h3>
+  <h3 style="font-size:15px;margin-top:15px">Import Proktor (Excel)</h3>
   <input type="file" id="excelProktor" accept=".xlsx">
   <button onclick="importProktor()">Import</button>
 
   <table>
-    <thead><tr><th>Email</th><th>Nama</th><th>Lembaga</th><th>Kecamatan</th></tr></thead>
+    <thead>
+      <tr><th>Email</th><th>Nama</th><th>Lembaga</th><th>Kecamatan</th></tr>
+    </thead>
     <tbody id="tblProktor"></tbody>
   </table>
 </div>
 
-<!-- BANK SOAL (EDITOR FINAL) -->
+<!-- BANK SOAL -->
 <div id="banksoal" class="section">
-<h2>Bank Soal ANBK</h2>
+  <h2>📘 Bank Soal ANBK</h2>
+  <p style="font-size:12px;color:#666">Mode Editor • Perubahan langsung berlaku</p>
+  <hr>
 
-<select id="domainSoal">
-  <option value="">-- Pilih Domain --</option>
-  <option value="literasi">Literasi</option>
-  <option value="numerasi">Numerasi</option>
-</select>
+  <select id="domainSoal" style="max-width:200px">
+    <option value="">-- Pilih Domain --</option>
+    <option value="literasi">Literasi</option>
+    <option value="numerasi">Numerasi</option>
+  </select>
 
-<button onclick="toggleTes()">Aktifkan Tes</button>
-<span id="indikatorTes" class="status red">● Tidak Aktif</span>
+  <button onclick="toggleTes()">Aktifkan Tes</button>
+  <span id="indikatorTes" class="status red">● Tidak Aktif</span>
 
-<br><br>
+  <div style="margin-top:10px">
+    <input type="file" id="excelSoal" accept=".xlsx">
+    <button onclick="importSoal()">Import Soal</button>
+  </div>
 
-<input type="file" id="excelSoal" accept=".xlsx">
-<button onclick="importSoal()">Import Soal</button>
-
-<table>
-<thead>
-<tr>
-  <th>No</th>
-  <th>Pertanyaan</th>
-  <th>A</th>
-  <th>B</th>
-  <th>C</th>
-  <th>D</th>
-  <th>Jawaban</th>
-  <th>Gambar Soal</th>
-</tr>
-</thead>
-<tbody id="tblSoal"></tbody>
-</table>
+  <table>
+    <thead>
+      <tr>
+        <th>No</th>
+        <th>Pertanyaan</th>
+        <th>A</th>
+        <th>B</th>
+        <th>C</th>
+        <th>D</th>
+        <th>Jawaban</th>
+        <th>Gambar Soal</th>
+      </tr>
+    </thead>
+    <tbody id="tblSoal"></tbody>
+  </table>
 </div>
 
 </main>
@@ -164,7 +308,65 @@ function showSection(id){
   event.target.classList.add("active");
 }
 
-/* BANK SOAL LOAD */
+/* DASHBOARD */
+fetch(API_URL+"?action=adminStats")
+.then(r=>r.json()).then(d=>{
+  if(d.success){
+    totalProktor.innerText=d.totalProktor;
+    pesertaAktif.innerText=d.pesertaAktif||0;
+  }
+});
+
+/* PROKTOR */
+function loadProktor(){
+  fetch(API_URL+"?action=getProktor")
+  .then(r=>r.json()).then(d=>{
+    tblProktor.innerHTML="";
+    d.data.forEach(p=>{
+      tblProktor.innerHTML+=`<tr><td>${p.email}</td><td>${p.nama}</td><td>${p.lembaga}</td><td>${p.kecamatan}</td></tr>`;
+    });
+  });
+}
+loadProktor();
+
+function addProktor(){
+  showLoading();
+  fetch(API_URL,{
+    method:"POST",
+    body:JSON.stringify({
+      action:"addProktor",
+      email:pEmail.value,
+      password:pPass.value,
+      nama:pNama.value,
+      kode_lembaga:pLembaga.value,
+      kecamatan:pKecamatan.value
+    })
+  }).then(()=>{hideLoading();loadProktor();});
+}
+
+function importProktor(){
+  const f=excelProktor.files[0];
+  if(!f)return;
+  showLoading();
+  const r=new FileReader();
+  r.onload=e=>{
+    const wb=XLSX.read(e.target.result,{type:"binary"});
+    const ws=wb.Sheets[wb.SheetNames[0]];
+    const data=XLSX.utils.sheet_to_json(ws);
+    fetch(API_URL,{method:"POST",body:JSON.stringify({action:"importProktor",data})})
+    .then(()=>{hideLoading();loadProktor();});
+  };
+  r.readAsBinaryString(f);
+}
+
+/* BANK SOAL */
+let aktif=false;
+function toggleTes(){
+  aktif=!aktif;
+  indikatorTes.innerText=aktif?"● Aktif":"● Tidak Aktif";
+  indikatorTes.className="status "+(aktif?"green":"red");
+}
+
 function loadSoal(){
   fetch(API_URL+"?action=getBankSoal&domain="+domainSoal.value)
   .then(r=>r.json()).then(d=>{
@@ -210,6 +412,11 @@ function importSoal(){
     .then(()=>{hideLoading();loadSoal();});
   };
   r.readAsBinaryString(f);
+}
+
+function logout(){
+  localStorage.clear();
+  location.href="login.html";
 }
 </script>
 
