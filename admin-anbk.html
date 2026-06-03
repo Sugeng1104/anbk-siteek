@@ -9,7 +9,7 @@
 *{box-sizing:border-box}
 body{margin:0;font-family:"Segoe UI",Arial,sans-serif;background:#eef1f5;color:#333}
 
-/* HEADER */
+/* ===== HEADER ===== */
 header{
   background:#1e3a8a;color:#fff;
   padding:18px 28px;
@@ -18,7 +18,7 @@ header{
 header h1{margin:0;font-size:20px}
 header .user{font-size:13px;opacity:.9}
 
-/* LAYOUT */
+/* ===== LAYOUT ===== */
 .layout{display:flex;min-height:calc(100vh - 64px)}
 aside{
   width:260px;background:#fff;border-right:1px solid #ddd;padding:22px 0
@@ -33,14 +33,14 @@ aside a.active,aside a:hover{
 }
 main{flex:1;padding:28px}
 
-/* SECTION */
+/* ===== SECTION ===== */
 .section{
   background:#fff;border-radius:10px;padding:20px;
   box-shadow:0 2px 6px rgba(0,0,0,.08);
   margin-top:20px;display:none
 }
 
-/* DASHBOARD */
+/* ===== DASHBOARD ===== */
 .cards{
   display:grid;
   grid-template-columns:repeat(auto-fit,minmax(220px,1fr));
@@ -52,13 +52,13 @@ main{flex:1;padding:28px}
 }
 .card .value{font-size:26px;font-weight:600;color:#1e3a8a}
 
-/* TABLE */
+/* ===== TABLE ===== */
 table{width:100%;border-collapse:collapse;margin-top:10px;font-size:13px}
 th,td{border:1px solid #ddd;padding:8px;text-align:center;vertical-align:top}
 th{background:#f4f6fa}
 
-/* FORM */
-input,select,textarea{padding:6px;font-size:12px;width:100%}
+/* ===== FORM ===== */
+input,select,textarea{padding:6px;font-size:12px}
 textarea{min-height:60px}
 button{
   padding:6px 14px;font-size:12px;
@@ -68,13 +68,19 @@ button{
 }
 button:hover{background:#163172}
 
-.upload-btn{
-  margin-top:4px;
-  background:#059669;
-  font-size:11px
+/* ===== ICON UPLOAD ===== */
+.upload-icon{
+  margin-left:6px;
+  font-size:12px;
+  padding:2px 6px;
+  cursor:pointer;
+  background:#e9eefb;
+  border:1px solid #cfd8ff;
+  border-radius:4px
 }
+.upload-icon:hover{background:#dbe5ff}
 
-/* OVERLAY */
+/* ===== OVERLAY ===== */
 .overlay{
   position:fixed;top:0;left:0;width:100%;height:100%;
   background:rgba(255,255,255,.8);
@@ -253,31 +259,33 @@ function bukaSoal(){
 <td>${i+1}</td>
 <td>${s.pertanyaan}</td>
 
-${["A","B","C","D"].map(k=>`
-<td>
-  ${s[k]||""}
-  <input type="file" class="upload-btn"
-         onchange="uploadGambar(this)">
-</td>`).join("")}
+<td>${s.A||"-"} <span class="upload-icon" onclick="openUpload()">📷</span></td>
+<td>${s.B||"-"} <span class="upload-icon" onclick="openUpload()">📷</span></td>
+<td>${s.C||"-"} <span class="upload-icon" onclick="openUpload()">📷</span></td>
+<td>${s.D||"-"} <span class="upload-icon" onclick="openUpload()">📷</span></td>
 
-<td>${s.kunci||""}</td>
+<td>${s.kunci||"-"}</td>
 
 <td>
-  ${s.gambar?'<img src="'+s.gambar+'" width="60"><br>':'-'}
-  <input type="file" class="upload-btn"
-         onchange="uploadGambar(this)">
+  ${s.gambar?'<img src="'+s.gambar+'" width="50"><br>':'-'}
+  <span class="upload-icon" onclick="openUpload()">📷</span>
 </td>
 </tr>`;
     });
   });
 }
 
-function uploadGambar(input){
-  const file=input.files[0];
-  if(!file) return;
+function openUpload(){
+  const input=document.createElement("input");
+  input.type="file";
+  input.accept="image/*";
+  input.onchange=()=>uploadGambar(input.files[0]);
+  input.click();
+}
 
+function uploadGambar(file){
+  if(!file)return;
   overlay.style.display="flex";
-
   const r=new FileReader();
   r.onload=e=>{
     fetch(API_URL,{
@@ -292,7 +300,7 @@ function uploadGambar(input){
     .then(res=>{
       overlay.style.display="none";
       if(res.success){
-        alert("Upload berhasil:\n"+res.url);
+        alert("Upload berhasil");
       }else{
         alert("Upload gagal");
       }
@@ -304,9 +312,7 @@ function uploadGambar(input){
 function importSoal(){
   const f=excelSoal.files[0];
   if(!f){alert("Pilih file");return;}
-
   overlay.style.display="flex";
-
   const r=new FileReader();
   r.onload=e=>{
     const wb=XLSX.read(e.target.result,{type:"binary"});
