@@ -1,164 +1,48 @@
 <!DOCTYPE html>
-<html lang="id">
+<html>
 <head>
-  <meta charset="UTF-8" />
-  <title>Login CBT / ANBK</title>
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-
-  <!-- ✅ SUPABASE CDN RESMI (UMD) -->
-  <script src="https://unpkg.com/@supabase/supabase-js@2/dist/umd/supabase.min.js"></script>
-
-  <style>
-    body {
-      margin: 0;
-      font-family: Arial, Helvetica, sans-serif;
-      background: #f2f2f2;
-    }
-    .box {
-      width: 360px;
-      margin: 100px auto;
-      padding: 25px;
-      background: #fff;
-      border-radius: 6px;
-      box-shadow: 0 2px 8px rgba(0,0,0,.1);
-    }
-    h3 {
-      text-align: center;
-      margin-top: 0;
-      color: #0f4c81;
-    }
-    input, button {
-      width: 100%;
-      padding: 10px;
-      margin-top: 10px;
-      font-size: 14px;
-      box-sizing: border-box;
-    }
-    button {
-      background: #0f4c81;
-      color: white;
-      border: none;
-      cursor: pointer;
-      font-weight: bold;
-    }
-    button:hover {
-      background: #09385f;
-    }
-    #msg {
-      margin-top: 10px;
-      min-height: 18px;
-      font-size: 13px;
-      color: #b00020;
-      text-align: center;
-    }
-  </style>
+  <title>Login CBT</title>
 </head>
-
 <body>
 
-  <div class="box">
-    <h3>LOGIN CBT</h3>
+<h3>LOGIN CBT</h3>
 
-    <input id="email" type="email" placeholder="Email" />
-    <input id="password" type="password" placeholder="Password" />
+<input id="email" placeholder="Email"><br>
+<input id="password" type="password" placeholder="Password"><br>
+<button onclick="login()">Masuk</button>
 
-    <button id="btnLogin">Masuk</button>
-    <div id="msg"></div>
-  </div>
+<p id="msg"></p>
 
-  <script>
-    /*********************************
-     * DEBUG PALING AWAL
-     *********************************/
-    console.log("✅ login.html TERLOAD");
-    document.getElementById("msg").innerText = "Halaman siap. Silakan login.";
+<script>
+const API_URL = "PASTE_URL_APPS_SCRIPT";
 
-    /*********************************
-     * KONFIGURASI SUPABASE (WAJIB BENAR)
-     *********************************/
-    const SUPABASE_URL = "https://nbbjapiptpsszwxxafrt.supabase.co"; 
-    const SUPABASE_ANON_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im5iYmphcGlwdHBzc3p3eHhhZnJ0Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODAyOTcxNDMsImV4cCI6MjA5NTg3MzE0M30.88TcUDb2JLcyR8HempOiGcaQ62yczLA721HZSbQ6Qvc";
+async function login() {
+  const email = email.value;
+  const password = password.value;
 
-    const supabase = window.supabase.createClient(
-      SUPABASE_URL,
-      SUPABASE_ANON_KEY
-    );
+  const res = await fetch(API_URL, {
+    method: "POST",
+    body: JSON.stringify({
+      action: "login",
+      email,
+      password
+    })
+  });
 
-    console.log("✅ Supabase client dibuat");
+  const json = await res.json();
 
-    /*********************************
-     * EVENT LISTENER (AMAN)
-     *********************************/
-    document.getElementById("btnLogin").addEventListener("click", login);
+  if (!json.success) {
+    msg.innerText = json.message;
+    return;
+  }
 
-    async function login() {
-      console.log("➡️ Tombol LOGIN diklik");
-
-      const email = document.getElementById("email").value.trim();
-      const password = document.getElementById("password").value;
-      const msg = document.getElementById("msg");
-
-      if (!email || !password) {
-        msg.innerText = "Email dan password wajib diisi";
-        return;
-      }
-
-      msg.innerText = "Memproses login...";
-
-      try {
-        /*********************************
-         * LOGIN AUTH SUPABASE
-         *********************************/
-        const { data, error } = await supabase.auth.signInWithPassword({
-          email: email,
-          password: password
-        });
-
-        if (error) {
-          console.error("❌ AUTH ERROR:", error);
-          msg.innerText = error.message;
-          return;
-        }
-
-        console.log("✅ Login auth berhasil", data.user.id);
-
-        /*********************************
-         * AMBIL ROLE (OPTIONAL, TAPI AMAN)
-         *********************************/
-        const { data: profile, error: pError } = await supabase
-          .from("profiles")
-          .select("role")
-          .eq("id", data.user.id)
-          .maybeSingle();
-
-        if (pError) {
-          console.error("⚠️ ERROR ambil profile:", pError);
-          msg.innerText = "Login berhasil, tapi role tidak bisa dibaca";
-          return;
-        }
-
-        if (!profile) {
-          msg.innerText = "Login berhasil, role belum di-set";
-          return;
-        }
-
-        console.log("✅ Role:", profile.role);
-
-        /*********************************
-         * REDIRECT
-         *********************************/
-        if (profile.role === "proktor" || profile.role === "admin") {
-          window.location.href = "proktor.html";
-        } else {
-          window.location.href = "token.html";
-        }
-
-      } catch (e) {
-        console.error("❌ EXCEPTION:", e);
-        msg.innerText = "Terjadi kesalahan. Lihat Console.";
-      }
-    }
-  </script>
+  if (json.role === "proktor") {
+    location.href = "proktor.html";
+  } else {
+    location.href = "ujian.html";
+  }
+}
+</script>
 
 </body>
 </html>
