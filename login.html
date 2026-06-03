@@ -129,6 +129,7 @@ document.getElementById("btnLogin").onclick = async () => {
 
   msg.innerText = "Memproses login...";
 
+  // ✅ PENTING: pakai & bukan &amp;
   const url =
     API_URL +
     "?action=login" +
@@ -145,26 +146,26 @@ document.getElementById("btnLogin").onclick = async () => {
     }
 
     // simpan session
-localStorage.setItem("email", email);
-localStorage.setItem("role", json.role);
+    localStorage.setItem("email", email);
+    localStorage.setItem("role", json.role);
 
-// redirect berdasarkan role
-if (json.role === "proktor") {
-  window.location.href = "proktor.html";
-  return;
-}
+    // redirect berdasarkan role
+    if (json.role === "proktor") {
+      window.location.href = "proktor.html";
+      return;
+    }
 
-if (json.role === "admin-anbk") {
-  window.location.href = "admin-anbk.html";
-  return;
-}
+    if (json.role === "admin-anbk") {
+      window.location.href = "admin-anbk.html";
+      return;
+    }
 
-if (json.role === "siswa") {
-  window.location.href = "ujian.html";
-  return;
-}
+    if (json.role === "siswa") {
+      window.location.href = "ujian.html";
+      return;
+    }
 
-msg.innerText = "Role tidak dikenal: " + json.role;
+    msg.innerText = "Role tidak dikenal: " + json.role;
 
   } catch (e) {
     console.error(e);
