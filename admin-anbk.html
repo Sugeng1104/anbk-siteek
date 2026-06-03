@@ -24,8 +24,13 @@ aside{
   width:260px;background:#fff;border-right:1px solid #ddd;padding:22px 0
 }
 aside h3{margin:0 24px 12px;font-size:12px;color:#666;text-transform:uppercase}
-aside a{display:block;padding:12px 24px;color:#333;text-decoration:none;cursor:pointer}
-aside a.active,aside a:hover{background:#eef5ff;color:#1e3a8a;font-weight:600}
+aside a{
+  display:block;padding:12px 24px;color:#333;
+  cursor:pointer;text-decoration:none
+}
+aside a.active,aside a:hover{
+  background:#eef5ff;color:#1e3a8a;font-weight:600
+}
 main{flex:1;padding:28px}
 
 /* SECTION */
@@ -36,26 +41,41 @@ main{flex:1;padding:28px}
 }
 
 /* DASHBOARD */
-.cards{display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:20px}
-.card{background:#fff;border-radius:10px;padding:20px;box-shadow:0 2px 6px rgba(0,0,0,.08)}
+.cards{
+  display:grid;
+  grid-template-columns:repeat(auto-fit,minmax(220px,1fr));
+  gap:20px
+}
+.card{
+  background:#fff;border-radius:10px;padding:20px;
+  box-shadow:0 2px 6px rgba(0,0,0,.08)
+}
 .card .value{font-size:26px;font-weight:600;color:#1e3a8a}
 
 /* TABLE */
 table{width:100%;border-collapse:collapse;margin-top:10px;font-size:13px}
-th,td{border:1px solid #ddd;padding:8px;text-align:center}
+th,td{border:1px solid #ddd;padding:8px;text-align:center;vertical-align:top}
 th{background:#f4f6fa}
 
 /* FORM */
-input,select,textarea{padding:6px;font-size:12px;width:100%}
-textarea{min-height:70px}
+input,select,textarea{padding:6px;font-size:12px;width:auto}
+textarea{min-height:70px;width:100%}
 button{
   padding:6px 14px;font-size:12px;border:none;
-  border-radius:6px;background:#1e3a8a;color:#fff;cursor:pointer
+  border-radius:6px;background:#1e3a8a;color:#fff;
+  cursor:pointer;transition:.2s
 }
-button:hover{background:#163172}
+button:hover{background:#163172;transform:translateY(-1px)}
+button:active{transform:scale(.97)}
 
-/* BANK CONTROL */
-.control-row{display:flex;align-items:center;gap:10px;flex-wrap:wrap}
+/* CONTROL */
+.control-row{
+  display:flex;
+  align-items:center;
+  gap:10px;
+  flex-wrap:wrap;
+  margin-top:12px
+}
 .indicator{display:flex;align-items:center;gap:6px;font-weight:bold}
 .dot{width:10px;height:10px;border-radius:50%}
 .dot.red{background:#b00020}
@@ -80,7 +100,8 @@ button:hover{background:#163172}
   position:fixed;top:50%;left:50%;
   transform:translate(-50%,-50%);
   background:#fff;padding:30px 40px;
-  border-radius:14px;box-shadow:0 8px 30px rgba(0,0,0,.25);
+  border-radius:14px;
+  box-shadow:0 8px 30px rgba(0,0,0,.25);
   display:none;text-align:center;z-index:10000
 }
 .success-box .check{font-size:52px;color:#059669}
@@ -122,7 +143,7 @@ button:hover{background:#163172}
   </div>
 </div>
 
-<!-- ✅ MANAGEMEN PROKTOR DIKEMBALIKAN -->
+<!-- PROKTOR -->
 <div id="proktor" class="section">
   <h2>Manajemen Proktor</h2>
 
@@ -142,7 +163,9 @@ button:hover{background:#163172}
   <button onclick="importProktor()">Import</button>
 
   <table>
-    <thead><tr><th>Email</th><th>Nama</th><th>Lembaga</th><th>Kecamatan</th></tr></thead>
+    <thead>
+      <tr><th>Email</th><th>Nama</th><th>Lembaga</th><th>Kecamatan</th></tr>
+    </thead>
     <tbody id="tblProktor"></tbody>
   </table>
 </div>
@@ -152,21 +175,34 @@ button:hover{background:#163172}
 <h2>📘 Bank Soal ANBK</h2>
 
 <div class="control-row">
-  <select id="domainSoal" onchange="loadSoal()">
-    <option value="">-- Pilih Domain --</option>
+  <select id="domainSoal">
+    <option value="">-- Pilih Domain Tes --</option>
     <option value="literasi">Literasi</option>
     <option value="numerasi">Numerasi</option>
   </select>
 
   <button onclick="toggleTes()">Aktifkan Tes</button>
+
   <div id="indikator" class="indicator">
     <span class="dot red"></span> Tidak Aktif
   </div>
 </div>
 
-<div style="margin-top:12px">
+<!-- ✅ BARIS LURUS IMPORT + BUKA -->
+<div class="control-row">
+
   <input type="file" id="excelSoal" accept=".xlsx">
+
   <button onclick="importSoal()">Import Soal</button>
+
+  <select id="filterDomain">
+    <option value="">-- Pilih Domain --</option>
+    <option value="literasi">Literasi</option>
+    <option value="numerasi">Numerasi</option>
+  </select>
+
+  <button onclick="bukaSoal()">Buka</button>
+
 </div>
 
 <table>
@@ -202,7 +238,7 @@ fetch(API_URL+"?action=adminStats")
   pesertaAktif.innerText=d.pesertaAktif||0;
 });
 
-/* ✅ PROKTOR */
+/* PROKTOR */
 function loadProktor(){
   fetch(API_URL+"?action=getProktor")
   .then(r=>r.json()).then(d=>{
@@ -237,10 +273,21 @@ function importProktor(){
 }
 
 /* BANK SOAL */
-function loadSoal(){
-  fetch(API_URL+"?action=getBankSoal&domain="+domainSoal.value)
-  .then(r=>r.json()).then(d=>{
+function bukaSoal(){
+  const domain = filterDomain.value;
+  if(!domain){ alert("Pilih domain"); return; }
+
+  overlay.style.display="flex";
+
+  fetch(API_URL+"?action=getBankSoal&domain="+domain)
+  .then(r=>r.json())
+  .then(d=>{
+    overlay.style.display="none";
     tblSoal.innerHTML="";
+    if(!d.data.length){
+      tblSoal.innerHTML="<tr><td colspan='8'>Tidak ada soal</td></tr>";
+      return;
+    }
     d.data.forEach((s,i)=>{
       tblSoal.innerHTML+=`
       <tr>
@@ -257,21 +304,23 @@ function loadSoal(){
   });
 }
 
-/* IMPORT SOAL */
 function importSoal(){
   const f = excelSoal.files[0];
-  if(!f) return alert("Pilih file Excel");
+  if(!f){ alert("Pilih file Excel"); return; }
+
   overlay.style.display="flex";
+
   const r = new FileReader();
   r.onload = e=>{
     const wb = XLSX.read(e.target.result,{type:"binary"});
     const data = XLSX.utils.sheet_to_json(wb.Sheets[wb.SheetNames[0]]);
+
     fetch(API_URL,{method:"POST",body:JSON.stringify({action:"importSoal",data})})
     .then(()=>{
       overlay.style.display="none";
       successBox.style.display="block";
       tingSound.play();
-      setTimeout(()=>{successBox.style.display="none";loadSoal();},1500);
+      setTimeout(()=>{successBox.style.display="none";},1500);
     });
   };
   r.readAsBinaryString(f);
