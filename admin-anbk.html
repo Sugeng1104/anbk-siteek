@@ -6,16 +6,9 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
 <style>
-/* ===== RESET & BASE ===== */
 *{box-sizing:border-box}
-body{
-  margin:0;
-  font-family:"Segoe UI",Arial,sans-serif;
-  background:#eef1f5;
-  color:#333;
-}
+body{margin:0;font-family:"Segoe UI",Arial,sans-serif;background:#eef1f5;color:#333}
 
-/* ===== HEADER ===== */
 header{
   background:#1e3a8a;
   color:white;
@@ -27,133 +20,76 @@ header{
 header h1{margin:0;font-size:20px}
 header .user{font-size:13px;opacity:.9}
 
-/* ===== LAYOUT ===== */
 .layout{display:flex;min-height:calc(100vh - 64px)}
 
-/* ===== SIDEBAR ===== */
 aside{
-  width:260px;
-  background:#fff;
-  border-right:1px solid #ddd;
-  padding:22px 0
+  width:260px;background:#fff;border-right:1px solid #ddd;padding:22px 0
 }
 aside h3{
-  margin:0 24px 12px;
-  font-size:12px;
-  color:#666;
-  text-transform:uppercase
+  margin:0 24px 12px;font-size:12px;color:#666;text-transform:uppercase
 }
 aside a{
-  display:block;
-  padding:12px 24px;
-  color:#333;
-  text-decoration:none;
-  cursor:pointer
+  display:block;padding:12px 24px;
+  color:#333;text-decoration:none;cursor:pointer
 }
-aside a.active,
-aside a:hover{
-  background:#eef5ff;
-  color:#1e3a8a;
-  font-weight:600
+aside a.active,aside a:hover{
+  background:#eef5ff;color:#1e3a8a;font-weight:600
 }
 
-/* ===== MAIN ===== */
 main{flex:1;padding:28px}
 
-/* ===== DASHBOARD ===== */
 .cards{
   display:grid;
   grid-template-columns:repeat(auto-fit,minmax(220px,1fr));
   gap:20px
 }
 .card{
-  background:#fff;
-  border-radius:10px;
+  background:#fff;border-radius:10px;
   padding:20px;
   box-shadow:0 2px 6px rgba(0,0,0,.08)
 }
 .card h4{margin:0 0 6px;font-size:14px;color:#666}
 .card .value{font-size:26px;font-weight:600;color:#1e3a8a}
 
-/* ===== SECTION ===== */
 .section{
-  background:#fff;
-  border-radius:10px;
+  background:#fff;border-radius:10px;
   padding:20px;
   box-shadow:0 2px 6px rgba(0,0,0,.08);
-  margin-top:20px;
-  display:none
-}
-.section h2{
-  margin:0 0 10px;
-  font-size:18px;
-  color:#1e3a8a
+  margin-top:20px;display:none
 }
 
-/* ===== TABLE ===== */
 table{
-  width:100%;
-  border-collapse:collapse;
-  margin-top:10px;
-  font-size:13px
+  width:100%;border-collapse:collapse;margin-top:10px;font-size:13px
 }
 th,td{
-  border:1px solid #ddd;
-  padding:6px;
-  text-align:center;
-  vertical-align:top
+  border:1px solid #ddd;padding:6px;
+  text-align:center;vertical-align:top
 }
-th{
-  background:#f4f6fa;
-  font-weight:600
-}
+th{background:#f4f6fa;font-weight:600}
 
-/* ===== FORM ===== */
 input,select,textarea{
-  padding:6px;
-  font-size:12px;
-  width:100%
+  padding:6px;font-size:12px;width:100%
 }
 textarea{min-height:60px}
 button{
   padding:6px 10px;
   font-size:12px;
   background:#1e3a8a;
-  color:white;
-  border:none;
-  border-radius:6px;
-  cursor:pointer
+  color:white;border:none;
+  border-radius:6px;cursor:pointer
 }
 
 .upload-btn{
   margin-top:4px;
-  background:#059669;
+  background:#059669
 }
 
-/* ===== BANK SOAL ===== */
-#banksoal{
-  background:#fafbff;
-}
-#banksoal th{
-  background:#e9edf5;
-  white-space:nowrap
-}
-#banksoal img{
-  border:1px solid #ccc;
-  border-radius:4px;
-  margin-top:4px;
-  max-width:70px
-}
-
-/* ===== STATUS ===== */
 .status{font-weight:bold}
 .green{color:#059669}
 .red{color:#b00020}
 
-/* ===== SPINNER ===== */
 .overlay{
-  position:fixed;
-  top:0;left:0;
+  position:fixed;top:0;left:0;
   width:100%;height:100%;
   background:rgba(255,255,255,.75);
   display:none;
@@ -193,7 +129,7 @@ button{
 
 <main>
 
-<!-- DASHBOARD -->
+<!-- DASHBOARD (UTUH) -->
 <div id="dashboard" class="section" style="display:block">
   <div class="cards">
     <div class="card">
@@ -207,12 +143,36 @@ button{
   </div>
 </div>
 
-<!-- PROKTOR (TIDAK DIUBAH) -->
+<!-- MANAGEMEN PROKTOR (UTUH, TIDAK DISENTUH) -->
 <div id="proktor" class="section">
-  <!-- isi sama persis seperti sebelumnya -->
+  <h2>Manajemen Proktor</h2>
+
+  <div style="margin-bottom:10px">
+    <input id="filterKecamatan" placeholder="Filter Kecamatan" style="max-width:200px">
+    <button onclick="loadProktor()">Tampilkan</button>
+  </div>
+
+  <h3 style="font-size:15px">Tambah Proktor</h3>
+  <input id="pEmail" placeholder="Email">
+  <input id="pPass" placeholder="Password">
+  <input id="pNama" placeholder="Nama">
+  <input id="pLembaga" placeholder="Kode Lembaga">
+  <input id="pKecamatan" placeholder="Kecamatan">
+  <button onclick="addProktor()">Tambah</button>
+
+  <h3 style="font-size:15px;margin-top:15px">Import Proktor (Excel)</h3>
+  <input type="file" id="excelProktor" accept=".xlsx">
+  <button onclick="importProktor()">Import</button>
+
+  <table>
+    <thead>
+      <tr><th>Email</th><th>Nama</th><th>Lembaga</th><th>Kecamatan</th></tr>
+    </thead>
+    <tbody id="tblProktor"></tbody>
+  </table>
 </div>
 
-<!-- BANK SOAL -->
+<!-- BANK SOAL (DITAMBAH UPLOAD GAMBAR, TANPA MERUSAK) -->
 <div id="banksoal" class="section">
 <h2>📘 Bank Soal ANBK</h2>
 
@@ -267,58 +227,58 @@ function showSection(id){
   event.target.classList.add("active");
 }
 
-/* BANK SOAL LOAD */
+/* ===== BANK SOAL LOAD (AMAN) ===== */
 function loadSoal(){
   fetch(API_URL+"?action=getBankSoal&domain="+domainSoal.value)
   .then(r=>r.json()).then(d=>{
     tblSoal.innerHTML="";
     d.data.forEach((s,i)=>{
       tblSoal.innerHTML+=`
-      <tr>
-        <td>${i+1}</td>
-        <td><textarea>${s.pertanyaan||""}</textarea></td>
+<tr>
+<td>${i+1}</td>
+<td><textarea>${s.pertanyaan||""}</textarea></td>
 
-        ${["A","B","C","D"].map(k=>`
-        <td>
-          <input value="${s[k]||""}">
-          <input type="file" onchange="uploadImage(this)">
-        </td>`).join("")}
+${["A","B","C","D"].map(k=>`
+<td>
+  <input value="${s[k]||""}">
+  <input type="file" class="upload-btn" onchange="uploadImage(this)">
+</td>`).join("")}
 
-        <td>
-          <select>
-            <option ${s.kunci=="A"?"selected":""}>A</option>
-            <option ${s.kunci=="B"?"selected":""}>B</option>
-            <option ${s.kunci=="C"?"selected":""}>C</option>
-            <option ${s.kunci=="D"?"selected":""}>D</option>
-            <option ${s.kunci=="A,C"?"selected":""}>A,C</option>
-          </select>
-        </td>
+<td>
+<select>
+<option ${s.kunci=="A"?"selected":""}>A</option>
+<option ${s.kunci=="B"?"selected":""}>B</option>
+<option ${s.kunci=="C"?"selected":""}>C</option>
+<option ${s.kunci=="D"?"selected":""}>D</option>
+<option ${s.kunci=="A,C"?"selected":""}>A,C</option>
+</select>
+</td>
 
-        <td>
-          ${s.gambar?`<img src="${s.gambar}">`:""}
-          <input value="${s.gambar||""}">
-          <input type="file" onchange="uploadImage(this)">
-        </td>
-      </tr>`;
+<td>
+${s.gambar?`<img src="${s.gambar}"><br>`:""}
+<input value="${s.gambar||""}">
+<input type="file" class="upload-btn" onchange="uploadImage(this)">
+</td>
+</tr>`;
     });
   });
 }
 domainSoal.onchange=loadSoal;
 
-/* UPLOAD IMAGE */
+/* ===== UPLOAD GAMBAR (GITHUB VIA APPS SCRIPT) ===== */
 async function uploadImage(input){
   const file=input.files[0];
-  if(!file)return;
+  if(!file) return;
   showLoading();
   const reader=new FileReader();
   reader.onload=async()=>{
-    const b64=reader.result.split(",")[1];
+    const base64=reader.result.split(",")[1];
     const res=await fetch(API_URL,{
       method:"POST",
       body:JSON.stringify({
         action:"uploadImage",
         filename:file.name,
-        base64:b64
+        base64:base64
       })
     });
     const json=await res.json();
