@@ -115,7 +115,7 @@
 </div>
 
 <script>
-const API_URL = "https://script.google.com/macros/s/AKfycbwAMuLgi9u9v7GVUypyemAOyQgrSRHjxGXgxr578dJXYDluSDK0NbpVjamilFVEL1M/exec"; // HARUS /exec
+const API_URL = "https://script.google.com/macros/s/AKfycbwAMuLgi9u9v7GVUypyemAOyQgrSRHjxGXgxr578dJXYDluSDK0NbpVjamilFVEL1M/exec";
 
 document.getElementById("btnLogin").onclick = login;
 
@@ -134,32 +134,25 @@ async function login(){
   btn.disabled = true;
 
   try{
-    const res = await fetch(API_URL,{
-      method: "POST",
-      mode: "cors",                       // ✅ WAJIB
-      headers: {
-        "Content-Type": "application/json" // ✅ WAJIB
-      },
-      body: JSON.stringify({
-        action: "login",
-        email: email,
-        password: password
-      })
-    });
+    const url =
+      API_URL +
+      "?action=login" +
+      "&email=" + encodeURIComponent(email) +
+      "&password=" + encodeURIComponent(password);
 
+    const res = await fetch(url);
     const json = await res.json();
 
     if(!json.success){
-      msg.innerText = json.message || "Login gagal";
+      msg.innerText = json.message;
       btn.disabled = false;
       return;
     }
 
-    // ✅ SIMPAN SESSION
+    // simpan session
     localStorage.setItem("email", email);
     localStorage.setItem("role", json.role);
 
-    // ✅ REDIRECT BERDASARKAN ROLE
     if(json.role === "proktor"){
       location.href = "proktor.html";
       return;
@@ -174,8 +167,8 @@ async function login(){
     btn.disabled = false;
 
   }catch(err){
-    console.error("FETCH ERROR:", err);
-    msg.innerText = "Gagal koneksi ke server (cek Apps Script)";
+    console.error(err);
+    msg.innerText = "Gagal koneksi ke server";
     btn.disabled = false;
   }
 }
