@@ -11,12 +11,9 @@ body{margin:0;font-family:"Segoe UI",Arial,sans-serif;background:#eef1f5;color:#
 
 /* HEADER */
 header{
-  background:#1e3a8a;
-  color:#fff;
+  background:#1e3a8a;color:#fff;
   padding:18px 28px;
-  display:flex;
-  justify-content:space-between;
-  align-items:center
+  display:flex;justify-content:space-between;align-items:center
 }
 header h1{margin:0;font-size:20px}
 header .user{font-size:13px;opacity:.9}
@@ -27,13 +24,8 @@ aside{
   width:260px;background:#fff;border-right:1px solid #ddd;padding:22px 0
 }
 aside h3{margin:0 24px 12px;font-size:12px;color:#666;text-transform:uppercase}
-aside a{
-  display:block;padding:12px 24px;color:#333;
-  cursor:pointer;text-decoration:none
-}
-aside a.active,aside a:hover{
-  background:#eef5ff;color:#1e3a8a;font-weight:600
-}
+aside a{display:block;padding:12px 24px;color:#333;text-decoration:none;cursor:pointer}
+aside a.active,aside a:hover{background:#eef5ff;color:#1e3a8a;font-weight:600}
 main{flex:1;padding:28px}
 
 /* SECTION */
@@ -44,104 +36,61 @@ main{flex:1;padding:28px}
 }
 
 /* DASHBOARD */
-.cards{
-  display:grid;
-  grid-template-columns:repeat(auto-fit,minmax(220px,1fr));
-  gap:20px
-}
-.card{
-  background:#fff;border-radius:10px;padding:20px;
-  box-shadow:0 2px 6px rgba(0,0,0,.08)
-}
-.card .value{
-  font-size:26px;font-weight:600;color:#1e3a8a
-}
+.cards{display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:20px}
+.card{background:#fff;border-radius:10px;padding:20px;box-shadow:0 2px 6px rgba(0,0,0,.08)}
+.card .value{font-size:26px;font-weight:600;color:#1e3a8a}
 
 /* TABLE */
 table{width:100%;border-collapse:collapse;margin-top:10px;font-size:13px}
-th,td{border:1px solid #ddd;padding:8px;text-align:center;vertical-align:top}
+th,td{border:1px solid #ddd;padding:8px;text-align:center}
 th{background:#f4f6fa}
 
 /* FORM */
 input,select,textarea{padding:6px;font-size:12px;width:100%}
 textarea{min-height:70px}
-
-/* BUTTON */
 button{
-  padding:6px 14px;
-  font-size:12px;
-  border:none;
-  border-radius:6px;
-  cursor:pointer;
-  background:#1e3a8a;
-  color:#fff;
-  transition:all .2s ease;
+  padding:6px 14px;font-size:12px;border:none;
+  border-radius:6px;background:#1e3a8a;color:#fff;cursor:pointer
 }
-button:hover{
-  background:#163172;
-  transform:translateY(-1px);
-  box-shadow:0 4px 10px rgba(0,0,0,.2);
-}
-button:active{
-  transform:scale(.97);
-}
+button:hover{background:#163172}
 
-/* UPLOAD BUTTON */
-.upload-btn{margin-top:4px;background:#059669}
-
-/* CONTROL */
+/* BANK CONTROL */
 .control-row{display:flex;align-items:center;gap:10px;flex-wrap:wrap}
 .indicator{display:flex;align-items:center;gap:6px;font-weight:bold}
 .dot{width:10px;height:10px;border-radius:50%}
 .dot.red{background:#b00020}
 .dot.green{background:#059669}
 
-/* LOADING OVERLAY */
+/* LOADING */
 .overlay{
   position:fixed;top:0;left:0;width:100%;height:100%;
   background:rgba(255,255,255,.8);
-  display:none;
-  align-items:center;
-  justify-content:center;
+  display:none;align-items:center;justify-content:center;
   z-index:9999
 }
 .spinner{
-  width:60px;height:60px;
-  border:6px solid #ccc;
-  border-top:6px solid #1e3a8a;
-  border-radius:50%;
+  width:60px;height:60px;border:6px solid #ccc;
+  border-top:6px solid #1e3a8a;border-radius:50%;
   animation:spin 1s linear infinite
 }
 @keyframes spin{to{transform:rotate(360deg)}}
 
 /* SUCCESS */
 .success-box{
-  position:fixed;
-  top:50%;left:50%;
+  position:fixed;top:50%;left:50%;
   transform:translate(-50%,-50%);
-  background:#fff;
-  padding:30px 40px;
-  border-radius:14px;
-  box-shadow:0 8px 30px rgba(0,0,0,.25);
-  display:none;
-  text-align:center;
-  z-index:10000
+  background:#fff;padding:30px 40px;
+  border-radius:14px;box-shadow:0 8px 30px rgba(0,0,0,.25);
+  display:none;text-align:center;z-index:10000
 }
-.success-box .check{
-  font-size:52px;
-  color:#059669
-}
+.success-box .check{font-size:52px;color:#059669}
 </style>
 </head>
 
 <body>
 
-<!-- LOADING -->
-<div class="overlay" id="overlay">
-  <div class="spinner"></div>
-</div>
+<div class="overlay" id="overlay"><div class="spinner"></div></div>
 
-<!-- SUCCESS -->
 <div class="success-box" id="successBox">
   <div class="check">✅</div>
   <div style="margin-top:10px;font-weight:bold">Import Berhasil</div>
@@ -173,6 +122,31 @@ button:active{
   </div>
 </div>
 
+<!-- ✅ MANAGEMEN PROKTOR DIKEMBALIKAN -->
+<div id="proktor" class="section">
+  <h2>Manajemen Proktor</h2>
+
+  <input id="filterKecamatan" placeholder="Filter Kecamatan">
+  <button onclick="loadProktor()">Tampilkan</button>
+
+  <h3>Tambah Proktor</h3>
+  <input id="pEmail" placeholder="Email">
+  <input id="pPass" placeholder="Password">
+  <input id="pNama" placeholder="Nama">
+  <input id="pLembaga" placeholder="Kode Lembaga">
+  <input id="pKecamatan" placeholder="Kecamatan">
+  <button onclick="addProktor()">Tambah</button>
+
+  <h3>Import Proktor</h3>
+  <input type="file" id="excelProktor">
+  <button onclick="importProktor()">Import</button>
+
+  <table>
+    <thead><tr><th>Email</th><th>Nama</th><th>Lembaga</th><th>Kecamatan</th></tr></thead>
+    <tbody id="tblProktor"></tbody>
+  </table>
+</div>
+
 <!-- BANK SOAL -->
 <div id="banksoal" class="section">
 <h2>📘 Bank Soal ANBK</h2>
@@ -185,7 +159,6 @@ button:active{
   </select>
 
   <button onclick="toggleTes()">Aktifkan Tes</button>
-
   <div id="indikator" class="indicator">
     <span class="dot red"></span> Tidak Aktif
   </div>
@@ -229,30 +202,36 @@ fetch(API_URL+"?action=adminStats")
   pesertaAktif.innerText=d.pesertaAktif||0;
 });
 
-/* IMPORT SOAL – FINAL */
-function importSoal(){
-  const f = excelSoal.files[0];
-  if(!f) return alert("Pilih file Excel");
-
-  overlay.style.display="flex";
-
-  const r = new FileReader();
-  r.onload = e=>{
-    const wb = XLSX.read(e.target.result,{type:"binary"});
-    const data = XLSX.utils.sheet_to_json(wb.Sheets[wb.SheetNames[0]]);
-
-    fetch(API_URL,{
-      method:"POST",
-      body:JSON.stringify({action:"importSoal",data})
-    }).then(()=>{
-      overlay.style.display="none";
-      successBox.style.display="block";
-      tingSound.play();
-      setTimeout(()=>{
-        successBox.style.display="none";
-        loadSoal();
-      },1500);
+/* ✅ PROKTOR */
+function loadProktor(){
+  fetch(API_URL+"?action=getProktor")
+  .then(r=>r.json()).then(d=>{
+    tblProktor.innerHTML="";
+    d.data.forEach(p=>{
+      tblProktor.innerHTML+=`
+      <tr><td>${p.email}</td><td>${p.nama}</td><td>${p.lembaga}</td><td>${p.kecamatan}</td></tr>`;
     });
+  });
+}
+loadProktor();
+
+function addProktor(){
+  fetch(API_URL,{method:"POST",body:JSON.stringify({
+    action:"addProktor",
+    email:pEmail.value,password:pPass.value,
+    nama:pNama.value,kode_lembaga:pLembaga.value,
+    kecamatan:pKecamatan.value
+  })}).then(loadProktor);
+}
+
+function importProktor(){
+  const f=excelProktor.files[0];
+  const r=new FileReader();
+  r.onload=e=>{
+    const wb=XLSX.read(e.target.result,{type:"binary"});
+    const data=XLSX.utils.sheet_to_json(wb.Sheets[wb.SheetNames[0]]);
+    fetch(API_URL,{method:"POST",body:JSON.stringify({action:"importProktor",data})})
+    .then(loadProktor);
   };
   r.readAsBinaryString(f);
 }
@@ -264,21 +243,41 @@ function loadSoal(){
     tblSoal.innerHTML="";
     d.data.forEach((s,i)=>{
       tblSoal.innerHTML+=`
-<tr>
-<td>${i+1}</td>
-<td>${s.pertanyaan}</td>
-<td>${s.A||""}</td>
-<td>${s.B||""}</td>
-<td>${s.C||""}</td>
-<td>${s.D||""}</td>
-<td>${s.kunci||""}</td>
-<td>${s.gambar?'<img src="'+s.gambar+'" width="60">':'-'}</td>
-</tr>`;
+      <tr>
+        <td>${i+1}</td>
+        <td>${s.pertanyaan}</td>
+        <td>${s.A||""}</td>
+        <td>${s.B||""}</td>
+        <td>${s.C||""}</td>
+        <td>${s.D||""}</td>
+        <td>${s.kunci||""}</td>
+        <td>${s.gambar?'<img src="'+s.gambar+'" width="60">':'-'}</td>
+      </tr>`;
     });
   });
 }
 
-/* AKTIFKAN TES */
+/* IMPORT SOAL */
+function importSoal(){
+  const f = excelSoal.files[0];
+  if(!f) return alert("Pilih file Excel");
+  overlay.style.display="flex";
+  const r = new FileReader();
+  r.onload = e=>{
+    const wb = XLSX.read(e.target.result,{type:"binary"});
+    const data = XLSX.utils.sheet_to_json(wb.Sheets[wb.SheetNames[0]]);
+    fetch(API_URL,{method:"POST",body:JSON.stringify({action:"importSoal",data})})
+    .then(()=>{
+      overlay.style.display="none";
+      successBox.style.display="block";
+      tingSound.play();
+      setTimeout(()=>{successBox.style.display="none";loadSoal();},1500);
+    });
+  };
+  r.readAsBinaryString(f);
+}
+
+/* TES */
 let aktif=false;
 function toggleTes(){
   aktif=!aktif;
