@@ -175,7 +175,24 @@ button:active{transform:scale(.97)}
 <h2>📘 Bank Soal ANBK</h2>
 
 <div class="control-row">
+  <select id="domainSoal">
+    <option value="">-- Pilih Domain Tes --</option>
+    <option value="literasi">Literasi</option>
+    <option value="numerasi">Numerasi</option>
+  </select>
+
+  <button onclick="toggleTes()">Aktifkan Tes</button>
+
+  <div id="indikator" class="indicator">
+    <span class="dot red"></span> Tidak Aktif
+  </div>
+</div>
+
+<!-- ✅ BARIS LURUS IMPORT + BUKA -->
+<div class="control-row">
+
   <input type="file" id="excelSoal" accept=".xlsx">
+
   <button onclick="importSoal()">Import Soal</button>
 
   <select id="filterDomain">
@@ -185,6 +202,7 @@ button:active{transform:scale(.97)}
   </select>
 
   <button onclick="bukaSoal()">Buka</button>
+
 </div>
 
 <table>
@@ -207,6 +225,7 @@ button:active{transform:scale(.97)}
 const API_URL="https://script.google.com/macros/s/AKfycbzhYhmgEliEpmgfyGGeM4iYnQSnLMrPJaRaPfws-wXy36NAXdJ5Z4AbLUDyzliW3Ios_w/exec";
 adminEmail.innerText=localStorage.getItem("email");
 
+/* MENU */
 function showSection(id){
   document.querySelectorAll(".section").forEach(s=>s.style.display="none");
   document.getElementById(id).style.display="block";
@@ -253,24 +272,22 @@ function importProktor(){
   r.readAsBinaryString(f);
 }
 
-/* ✅ BANK SOAL — FIX FINAL (TANPA &amp;) */
+/* BANK SOAL */
 function bukaSoal(){
   const domain = filterDomain.value;
   if(!domain){ alert("Pilih domain"); return; }
 
   overlay.style.display="flex";
 
-  fetch(API_URL + "?action=getBankSoal&domain=" + domain)
+  fetch(API_URL+"?action=getBankSoal&domain="+domain)
   .then(r=>r.json())
   .then(d=>{
     overlay.style.display="none";
     tblSoal.innerHTML="";
-
-    if(!d.data || d.data.length === 0){
+    if(!d.data.length){
       tblSoal.innerHTML="<tr><td colspan='8'>Tidak ada soal</td></tr>";
       return;
     }
-
     d.data.forEach((s,i)=>{
       tblSoal.innerHTML+=`
       <tr>
@@ -307,6 +324,15 @@ function importSoal(){
     });
   };
   r.readAsBinaryString(f);
+}
+
+/* TES */
+let aktif=false;
+function toggleTes(){
+  aktif=!aktif;
+  indikator.innerHTML = aktif
+    ? '<span class="dot green"></span> Aktif'
+    : '<span class="dot red"></span> Tidak Aktif';
 }
 
 function logout(){
