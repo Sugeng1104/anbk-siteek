@@ -1,47 +1,184 @@
 <!DOCTYPE html>
-<html>
+<html lang="id">
 <head>
-  <title>Login CBT</title>
+  <meta charset="UTF-8">
+  <title>Login Sistem CBT</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+  <style>
+    *{box-sizing:border-box}
+    body{
+      margin:0;
+      min-height:100vh;
+      font-family: Inter, Arial, sans-serif;
+      background: linear-gradient(135deg,#1e3a8a,#0f4c81);
+      display:flex;
+      align-items:center;
+      justify-content:center;
+    }
+
+    .login-box{
+      width:100%;
+      max-width:380px;
+      background:#fff;
+      border-radius:14px;
+      padding:32px 28px;
+      box-shadow:0 25px 50px rgba(0,0,0,.25);
+      animation:fade .6s ease;
+    }
+
+    @keyframes fade{
+      from{opacity:0;transform:translateY(12px)}
+      to{opacity:1;transform:none}
+    }
+
+    h1{
+      margin:0;
+      text-align:center;
+      font-size:22px;
+      color:#0f4c81;
+    }
+    p.sub{
+      margin:6px 0 26px;
+      text-align:center;
+      font-size:13px;
+      color:#555;
+    }
+
+    label{
+      font-size:13px;
+      font-weight:600;
+      color:#333;
+    }
+
+    input{
+      width:100%;
+      margin-top:6px;
+      margin-bottom:16px;
+      padding:12px;
+      border-radius:8px;
+      border:1px solid #ccc;
+      font-size:14px;
+    }
+
+    button{
+      width:100%;
+      padding:12px;
+      border:none;
+      border-radius:10px;
+      background:#0f4c81;
+      color:white;
+      font-size:15px;
+      font-weight:600;
+      cursor:pointer;
+    }
+
+    button:disabled{
+      opacity:.7;
+      cursor:not-allowed;
+    }
+
+    .msg{
+      margin-top:14px;
+      min-height:18px;
+      text-align:center;
+      font-size:13px;
+      color:#b00020;
+    }
+
+    footer{
+      margin-top:18px;
+      text-align:center;
+      font-size:11px;
+      color:#666;
+    }
+  </style>
 </head>
+
 <body>
 
-<h3>LOGIN CBT</h3>
+<div class="login-box">
+  <h1>LOGIN CBT</h1>
+  <p class="sub">Sistem Ujian Berbasis Komputer</p>
 
-<input id="email" placeholder="Email"><br>
-<input id="password" type="password" placeholder="Password"><br>
-<button onclick="login()">Masuk</button>
+  <label>Email</label>
+  <input id="email" type="email" placeholder="contoh@sekolah.id">
 
-<p id="msg"></p>
+  <label>Password</label>
+  <input id="password" type="password" placeholder="••••••••">
+
+  <button id="btnLogin">Masuk</button>
+
+  <div class="msg" id="msg"></div>
+
+  <footer>© 2026 CBT Sekolah</footer>
+</div>
 
 <script>
-const API_URL = "https://script.google.com/macros/s/AKfycbwAMuLgi9u9v7GVUypyemAOyQgrSRHjxGXgxr578dJXYDluSDK0NbpVjamilFVEL1M/exec";
+/* ================= CONFIG ================= */
+const API_URL = "https://script.google.com/macros/s/AKfycbwAMuLgi9u9v7GVUypyemAOyQgrSRHjxGXgxr578dJXYDluSDK0NbpVjamilFVEL1M/exec"; // WAJIB GANTI
+document.getElementById("btnLogin").onclick = login;
 
-async function login() {
-  const email = email.value;
-  const password = password.value;
+async function login(){
+  const email = emailInput().value.trim();
+  const password = passwordInput().value;
+  const msg = document.getElementById("msg");
+  const btn = document.getElementById("btnLogin");
 
-  const res = await fetch(API_URL, {
-    method: "POST",
-    body: JSON.stringify({
-      action: "login",
-      email,
-      password
-    })
-  });
-
-  const json = await res.json();
-
-  if (!json.success) {
-    msg.innerText = json.message;
+  if(!email || !password){
+    msg.innerText = "Email dan password wajib diisi";
     return;
   }
 
-  if (json.role === "proktor") {
-    location.href = "proktor.html";
-  } else {
-    location.href = "ujian.html";
+  msg.innerText = "Memproses login...";
+  btn.disabled = true;
+
+  try{
+    const res = await fetch(API_URL,{
+      method:"POST",
+      body:JSON.stringify({
+        action:"login",
+        email:email,
+        password:password
+      })
+    });
+
+    const json = await res.json();
+
+    if(!json.success){
+      msg.innerText = json.message || "Login gagal";
+      btn.disabled = false;
+      return;
+    }
+
+    // ✅ SIMPAN SESSION
+    localStorage.setItem("email",email);
+    localStorage.setItem("role",json.role);
+
+    // ✅ VALIDASI ROLE
+    if(json.role === "proktor"){
+      location.href = "proktor.html";
+      return;
+    }
+
+    if(json.role === "siswa"){
+      location.href = "ujian.html";
+      return;
+    }
+
+    msg.innerText = "Role tidak dikenali";
+    btn.disabled = false;
+
+  }catch(err){
+    console.error(err);
+    msg.innerText = "Gagal koneksi ke server";
+    btn.disabled = false;
   }
 }
+
+/* helper */
+function emailInput(){return document.getElementById("email")}
+function passwordInput(){return document.getElementById("password")}
 </script>
 
 </body>
