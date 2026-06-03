@@ -37,10 +37,37 @@
     .status{font-weight:bold}
     .green{color:#059669}
     .red{color:#b00020}
+
+    /* ===== SPINNER ===== */
+    .overlay{
+      position:fixed;
+      top:0;left:0;
+      width:100%;height:100%;
+      background:rgba(255,255,255,.7);
+      display:none;
+      align-items:center;
+      justify-content:center;
+      z-index:9999;
+    }
+    .spinner{
+      width:60px;height:60px;
+      border:6px solid #ccc;
+      border-top:6px solid #1e3a8a;
+      border-radius:50%;
+      animation:spin 1s linear infinite;
+    }
+    @keyframes spin{
+      to{transform:rotate(360deg)}
+    }
   </style>
 </head>
 
 <body>
+
+<!-- SPINNER OVERLAY -->
+<div class="overlay" id="overlay">
+  <div class="spinner"></div>
+</div>
 
 <header>
   <h1>ADMIN ANBK – DASHBOARD NASIONAL</h1>
@@ -49,7 +76,6 @@
 
 <div class="layout">
 
-  <!-- SIDEBAR -->
   <aside>
     <h3>Menu Admin</h3>
     <a class="active" onclick="showSection('dashboard')">Dashboard</a>
@@ -60,61 +86,41 @@
 
   <main>
 
-    <!-- ================= DASHBOARD (TIDAK DIUBAH) ================= -->
+    <!-- DASHBOARD -->
     <div id="dashboard" class="section" style="display:block">
       <div class="cards">
-        <div class="card">
-          <h4>Total Proktor</h4>
-          <div class="value" id="totalProktor">-</div>
-        </div>
-        <div class="card">
-          <h4>Peserta Aktif</h4>
-          <div class="value" id="pesertaAktif">-</div>
-        </div>
+        <div class="card"><h4>Total Proktor</h4><div class="value" id="totalProktor">-</div></div>
+        <div class="card"><h4>Peserta Aktif</h4><div class="value" id="pesertaAktif">-</div></div>
       </div>
     </div>
 
-    <!-- ================= MANAJEMEN PROKTOR (LENGKAP & DIKUNCI) ================= -->
+    <!-- PROKTOR -->
     <div id="proktor" class="section">
       <h2>Manajemen Proktor</h2>
-
-      <!-- Filter -->
       <input id="filterKecamatan" placeholder="Filter Kecamatan">
       <button onclick="loadProktor()">Tampilkan</button>
 
-      <hr>
-
-      <!-- Add Proktor Tunggal -->
-      <h3>Tambah Proktor (Satuan)</h3>
+      <h3>Tambah Proktor</h3>
       <input id="pEmail" placeholder="Email">
       <input id="pPass" placeholder="Password">
-      <input id="pNama" placeholder="Nama Proktor">
+      <input id="pNama" placeholder="Nama">
       <input id="pLembaga" placeholder="Kode Lembaga">
       <input id="pKecamatan" placeholder="Kecamatan">
-      <br>
-      <button onclick="addProktor()">Tambah Proktor</button>
+      <button onclick="addProktor()">Tambah</button>
 
-      <hr>
-
-      <!-- Import Proktor -->
-      <h3>Tambah Proktor Massal (Excel)</h3>
+      <h3>Import Proktor (Excel)</h3>
       <input type="file" id="excelProktor" accept=".xlsx">
-      <button onclick="importProktor()">Import Excel</button>
+      <button onclick="importProktor()">Import</button>
 
       <table>
         <thead>
-          <tr>
-            <th>Email</th>
-            <th>Nama</th>
-            <th>Lembaga</th>
-            <th>Kecamatan</th>
-          </tr>
+          <tr><th>Email</th><th>Nama</th><th>Lembaga</th><th>Kecamatan</th></tr>
         </thead>
         <tbody id="tblProktor"></tbody>
       </table>
     </div>
 
-    <!-- ================= BANK SOAL (DITAMBAHKAN, TERISOLASI) ================= -->
+    <!-- BANK SOAL -->
     <div id="banksoal" class="section">
       <h2>Bank Soal ANBK</h2>
 
@@ -127,19 +133,12 @@
       <button onclick="toggleTes()">Aktifkan Tes</button>
       <span id="indikatorTes" class="status red">● Tidak Aktif</span>
 
-      <hr>
-
       <input type="file" id="excelSoal" accept=".xlsx">
       <button onclick="importSoal()">Import Soal</button>
 
       <table>
         <thead>
-          <tr>
-            <th>No</th>
-            <th>Pertanyaan</th>
-            <th>Jawaban</th>
-            <th>Gambar</th>
-          </tr>
+          <tr><th>No</th><th>Pertanyaan</th><th>Jawaban</th><th>Gambar</th></tr>
         </thead>
         <tbody id="tblSoal"></tbody>
       </table>
@@ -148,20 +147,22 @@
   </main>
 </div>
 
-<!-- XLSX -->
 <script src="https://cdn.jsdelivr.net/npm/xlsx/dist/xlsx.full.min.js"></script>
 
 <script>
-/* ================= CONFIG ================= */
-const API_URL = "https://script.google.com/macros/s/AKfycbzhYhmgEliEpmgfyGGeM4iYnQSnLMrPJaRaPfws-wXy36NAXdJ5Z4AbLUDyzliW3Ios_w/exec";
+const API_URL="https://script.google.com/macros/s/AKfycbzhYhmgEliEpmgfyGGeM4iYnQSnLMrPJaRaPfws-wXy36NAXdJ5Z4AbLUDyzliW3Ios_w/exec";
+const overlay=document.getElementById("overlay");
 
-/* ================= SESSION ================= */
-const email = localStorage.getItem("email");
-const role  = localStorage.getItem("role");
-if(role !== "admin-anbk") location.href = "login.html";
-adminEmail.innerText = email;
+const email=localStorage.getItem("email");
+const role=localStorage.getItem("role");
+if(role!=="admin-anbk") location.href="login.html";
+adminEmail.innerText=email;
 
-/* ================= MENU ================= */
+/* SPINNER */
+function showLoading(){ overlay.style.display="flex"; }
+function hideLoading(){ overlay.style.display="none"; }
+
+/* MENU */
 function showSection(id){
   document.querySelectorAll(".section").forEach(s=>s.style.display="none");
   document.getElementById(id).style.display="block";
@@ -169,116 +170,93 @@ function showSection(id){
   event.target.classList.add("active");
 }
 
-/* ================= DASHBOARD ================= */
-fetch(API_URL + "?action=adminStats")
-.then(r=>r.json())
-.then(d=>{
+/* DASHBOARD */
+fetch(API_URL+"?action=adminStats").then(r=>r.json()).then(d=>{
   if(d.success){
-    totalProktor.innerText = d.totalProktor;
-    pesertaAktif.innerText = d.pesertaAktif || 0;
+    totalProktor.innerText=d.totalProktor;
+    pesertaAktif.innerText=d.pesertaAktif||0;
   }
 });
 
-/* ================= PROKTOR ================= */
+/* PROKTOR */
 function loadProktor(){
-  const kec = filterKecamatan.value || "";
-  fetch(API_URL + "?action=getProktor&kecamatan=" + encodeURIComponent(kec))
-  .then(r=>r.json())
-  .then(d=>{
+  fetch(API_URL+"?action=getProktor").then(r=>r.json()).then(d=>{
     tblProktor.innerHTML="";
     d.data.forEach(p=>{
-      tblProktor.innerHTML += `
-      <tr>
-        <td>${p.email}</td>
-        <td>${p.nama}</td>
-        <td>${p.lembaga}</td>
-        <td>${p.kecamatan}</td>
-      </tr>`;
+      tblProktor.innerHTML+=`<tr><td>${p.email}</td><td>${p.nama}</td><td>${p.lembaga}</td><td>${p.kecamatan}</td></tr>`;
     });
   });
 }
 loadProktor();
 
 function addProktor(){
-  fetch(API_URL,{
-    method:"POST",
-    body:JSON.stringify({
-      action:"addProktor",
-      email:pEmail.value,
-      password:pPass.value,
-      nama:pNama.value,
-      kode_lembaga:pLembaga.value,
-      kecamatan:pKecamatan.value
-    })
-  }).then(()=>{ alert("Proktor ditambahkan"); loadProktor(); });
+  showLoading();
+  fetch(API_URL,{method:"POST",body:JSON.stringify({
+    action:"addProktor",
+    email:pEmail.value,password:pPass.value,nama:pNama.value,
+    kode_lembaga:pLembaga.value,kecamatan:pKecamatan.value
+  })}).then(()=>{hideLoading();loadProktor();});
 }
 
 function importProktor(){
-  const file = excelProktor.files[0];
-  if(!file) return alert("Pilih file Excel");
-
-  const reader = new FileReader();
-  reader.onload = e=>{
-    const wb = XLSX.read(e.target.result,{type:"binary"});
-    const ws = wb.Sheets[wb.SheetNames[0]];
-    const data = XLSX.utils.sheet_to_json(ws);
-
-    fetch(API_URL,{
-      method:"POST",
-      body:JSON.stringify({action:"importProktor", data:data})
-    }).then(()=>{ alert("Import proktor selesai"); loadProktor(); });
+  const f=excelProktor.files[0];
+  if(!f)return;
+  showLoading();
+  const r=new FileReader();
+  r.onload=e=>{
+    const wb=XLSX.read(e.target.result,{type:"binary"});
+    const ws=wb.Sheets[wb.SheetNames[0]];
+    const data=XLSX.utils.sheet_to_json(ws);
+    fetch(API_URL,{method:"POST",body:JSON.stringify({action:"importProktor",data})})
+    .then(()=>{hideLoading();loadProktor();});
   };
-  reader.readAsBinaryString(file);
+  r.readAsBinaryString(f);
 }
 
-/* ================= BANK SOAL ================= */
-let aktif = false;
+/* BANK SOAL */
+let aktif=false;
 function toggleTes(){
-  aktif = !aktif;
-  indikatorTes.innerText = aktif ? "● Aktif" : "● Tidak Aktif";
-  indikatorTes.className = "status " + (aktif ? "green" : "red");
+  aktif=!aktif;
+  indikatorTes.innerText=aktif?"● Aktif":"● Tidak Aktif";
+  indikatorTes.className="status "+(aktif?"green":"red");
 }
 
 function loadSoal(){
-  fetch(API_URL + "?action=getBankSoal&domain=" + domainSoal.value)
-  .then(r=>r.json())
-  .then(d=>{
+  fetch(API_URL+"?action=getBankSoal&domain="+domainSoal.value)
+  .then(r=>r.json()).then(d=>{
     tblSoal.innerHTML="";
     d.data.forEach((s,i)=>{
-      tblSoal.innerHTML += `
+      tblSoal.innerHTML+=`
       <tr>
         <td>${i+1}</td>
         <td>${s.pertanyaan}</td>
         <td>${s.jawaban}</td>
-        <td>${s.gambar ? '<img src="'+s.gambar+'" width="60">' : '-'}</td>
+        <td>${s.gambar?'<img src="'+s.gambar+'" width="60">':'-'}</td>
       </tr>`;
     });
   });
 }
-domainSoal.onchange = loadSoal;
+domainSoal.onchange=loadSoal;
 
 function importSoal(){
-  const file = excelSoal.files[0];
-  if(!file) return alert("Pilih file Excel");
-
-  const reader = new FileReader();
-  reader.onload = e=>{
-    const wb = XLSX.read(e.target.result,{type:"binary"});
-    const ws = wb.Sheets[wb.SheetNames[0]];
-    const data = XLSX.utils.sheet_to_json(ws);
-
-    fetch(API_URL,{
-      method:"POST",
-      body:JSON.stringify({action:"importSoal", data:data})
-    }).then(()=>{ alert("Import soal selesai"); loadSoal(); });
+  const f=excelSoal.files[0];
+  if(!f)return;
+  showLoading();
+  const r=new FileReader();
+  r.onload=e=>{
+    const wb=XLSX.read(e.target.result,{type:"binary"});
+    const ws=wb.Sheets[wb.SheetNames[0]];
+    const data=XLSX.utils.sheet_to_json(ws);
+    fetch(API_URL,{method:"POST",body:JSON.stringify({action:"importSoal",data})})
+    .then(()=>{hideLoading();loadSoal();});
   };
-  reader.readAsBinaryString(file);
+  r.readAsBinaryString(f);
 }
 
-/* ================= LOGOUT ================= */
+/* LOGOUT */
 function logout(){
   localStorage.clear();
-  location.href = "login.html";
+  location.href="login.html";
 }
 </script>
 
