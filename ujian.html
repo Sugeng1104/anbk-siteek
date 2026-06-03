@@ -1,69 +1,193 @@
 <!DOCTYPE html>
-<html>
+<html lang="id">
 <head>
+  <meta charset="UTF-8" />
   <title>Ujian CBT</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+
+  <style>
+    body {
+      font-family: Arial, Helvetica, sans-serif;
+      background: #f4f6f8;
+      margin: 0;
+      padding: 0;
+    }
+    header {
+      background: #0f4c81;
+      color: white;
+      padding: 15px;
+      text-align: center;
+    }
+    .container {
+      max-width: 900px;
+      margin: auto;
+      padding: 20px;
+      background: white;
+      min-height: 100vh;
+    }
+    .timer {
+      font-size: 18px;
+      font-weight: bold;
+      color: #b00020;
+      margin-bottom: 15px;
+      text-align: right;
+    }
+    .soal {
+      margin-bottom: 25px;
+    }
+    .soal p {
+      font-weight: bold;
+    }
+    .opsi button {
+      display: block;
+      width: 100%;
+      text-align: left;
+      padding: 10px;
+      margin: 5px 0;
+      border: 1px solid #ccc;
+      background: #f9f9f9;
+      cursor: pointer;
+      border-radius: 4px;
+    }
+    .opsi button:hover {
+      background: #eef5ff;
+    }
+    .opsi button.active {
+      background: #dbeafe;
+      border-color: #2563eb;
+    }
+    .submit {
+      margin-top: 30px;
+      text-align: center;
+    }
+    .submit button {
+      padding: 12px 20px;
+      font-size: 15px;
+      background: #0f4c81;
+      color: white;
+      border: none;
+      cursor: pointer;
+      border-radius: 5px;
+    }
+  </style>
 </head>
+
 <body>
 
-<h3>UJIAN CBT</h3>
-<p>Waktu tersisa: <span id="timer"></span></p>
-<div id="soal"></div>
+<header>
+  <h2>UJIAN CBT</h2>
+</header>
+
+<div class="container">
+  <div class="timer">
+    Sisa Waktu: <span id="timer">--:--</span>
+  </div>
+
+  <div id="daftarSoal"></div>
+
+  <div class="submit">
+    <button onclick="selesaiUjian()">Selesai & Kirim</button>
+  </div>
+</div>
 
 <script>
-const API = "PASTE_URL_APPS_SCRIPT";
+/* ================= KONFIGURASI ================= */
+const API_URL = "PASTE_URL_APPS_SCRIPT";   // WAJIB GANTI
+const DURASI_MENIT = 30;                   // Durasi ujian (menit)
+
+/* ================= DATA USER ================= */
 const EMAIL = localStorage.getItem("email");
-let waktu = 300; // 5 menit
+if (!EMAIL) {
+  alert("Session habis. Silakan login ulang.");
+  location.href = "login.html";
+}
 
-function startTimer() {
-  const t = document.getElementById("timer");
+/* ================= TIMER ================= */
+let sisaDetik = DURASI_MENIT * 60;
+const timerEl = document.getElementById("timer");
+
+function mulaiTimer() {
   const interval = setInterval(() => {
-    let m = Math.floor(waktu / 60);
-    let s = waktu % 60;
-    t.innerText = `${m}:${s < 10 ? "0"+s : s}`;
-    waktu--;
+    let m = Math.floor(sisaDetik / 60);
+    let s = sisaDetik % 60;
+    timerEl.innerText = `${m}:${s < 10 ? '0' + s : s}`;
+    sisaDetik--;
 
-    if (waktu < 0) {
+    if (sisaDetik < 0) {
       clearInterval(interval);
-      submitNilai();
+      selesaiUjian();
     }
   }, 1000);
 }
 
-fetch(API, {
-  method: "POST",
-  body: JSON.stringify({ action: "getSoal" })
-})
-.then(r => r.json())
-.then(data => {
-  let html = "";
-  data.soal.forEach(s => {
-    html += `
-      <p>${s.pertanyaan}</p>
-      <button onclick="jawab(${s.id},'A')">A. ${s.A}</button>
-      <button onclick="jawab(${s.id},'B')">B. ${s.B}</button>
-      <button onclick="jawab(${s.id},'C')">C. ${s.C}</button>
-      <button onclick="jawab(${s.id},'D')">D. ${s.D}</button>
-      <hr>
-    `;
-  });
-  soal.innerHTML = html;
-  startTimer();
-});
-
-function jawab(id, jwb) {
-  fetch(API, {
+/* ================= UPDATE STATUS ================= */
+function updateStatus(status) {
+  fetch(API_URL, {
     method: "POST",
     body: JSON.stringify({
-      action: "jawab",
+      action: "updateStatus",
       email: EMAIL,
-      soal_id: id,
-      jawaban: jwb
+      status: status
     })
   });
 }
 
-function submitNilai() {
-  fetch(API, {
+/* ================= LOAD SOAL ================= */
+fetch(API_URL, {
+  method: "POST",
+  body: JSON.stringify({ action: "getSoal" })
+})
+.then(r => r.json())
+.then(res => {
+  if (!res.success) {
+    alert("Gagal memuat soal");
+    return;
+  }
+
+  let html = "";
+  res.soal.forEach((s, i) => {
+    html += `
+      <div class="soal">
+        <p>${i + 1}. ${s.pertanyaan}</p>
+        <div class="opsi">
+          <button onclick="jawab(${s.id}, 'A', this)">A. ${s.A}</button>
+          <button onclick="jawab(${s.id}, 'B', this)">B. ${s.B}</button>
+          <button onclick="jawab(${s.id}, 'C', this)">C. ${s.C}</button>
+          <button onclick="jawab(${s.id}, 'D', this)">D. ${s.D}</button>
+        </div>
+      </div>
+    `;
+  });
+
+  document.getElementById("daftarSoal").innerHTML = html;
+  updateStatus("mengerjakan");
+  mulaiTimer();
+});
+
+/* ================= SIMPAN JAWABAN ================= */
+function jawab(soalId, pilihan, el) {
+  // Highlight pilihan
+  const siblings = el.parentElement.querySelectorAll("button");
+  siblings.forEach(b => b.classList.remove("active"));
+  el.classList.add("active");
+
+  // Kirim ke backend
+  fetch(API_URL, {
+    method: "POST",
+    body: JSON.stringify({
+      action: "jawab",
+      email: EMAIL,
+      soal_id: soalId,
+      jawaban: pilihan
+    })
+  });
+}
+
+/* ================= SELESAI UJIAN ================= */
+function selesaiUjian() {
+  if (!confirm("Yakin ingin menyelesaikan ujian?")) return;
+
+  fetch(API_URL, {
     method: "POST",
     body: JSON.stringify({
       action: "nilai",
@@ -72,10 +196,17 @@ function submitNilai() {
   })
   .then(r => r.json())
   .then(res => {
-    alert("Ujian selesai. Nilai Anda: " + res.nilai);
+    updateStatus("selesai");
+    alert(`Ujian selesai.\nNilai Anda: ${res.nilai}`);
+    localStorage.removeItem("email");
     location.href = "index.html";
   });
 }
+
+/* ================= ANTI REFRESH (OPSIONAL) ================= */
+window.onbeforeunload = function () {
+  return "Ujian sedang berlangsung. Yakin ingin keluar?";
+};
 </script>
 
 </body>
