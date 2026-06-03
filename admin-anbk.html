@@ -90,23 +90,43 @@ button{padding:6px 10px;font-size:12px;background:#1e3a8a;color:white;border:non
   </table>
 </div>
 
-<!-- BANK SOAL -->
+<!-- BANK SOAL (PROFESIONAL + UPLOAD GAMBAR) -->
 <div id="banksoal" class="section">
   <h2>📘 Bank Soal ANBK</h2>
-  <select id="domainSoal" onchange="loadSoal()">
+  <p style="font-size:12px;color:#666">Import & verifikasi soal • Mode Admin</p>
+
+  <select id="domainSoal" onchange="loadSoal()" style="max-width:220px">
     <option value="">-- Pilih Domain --</option>
     <option value="literasi">Literasi</option>
     <option value="numerasi">Numerasi</option>
   </select>
 
+  <hr>
+
+  <!-- UPLOAD GAMBAR -->
+  <h3 style="font-size:14px">Upload Gambar Soal</h3>
+  <input type="file" id="uploadImg">
+  <button onclick="uploadGambar()">Upload</button>
+  <input id="resultImg" placeholder="URL gambar akan muncul di sini" readonly>
+
+  <p style="font-size:11px;color:#888">
+    Gunakan URL ini pada Excel (opsi A/B/C/D atau kolom gambar_soal)
+  </p>
+
+  <hr>
+
   <table>
-    <thead><tr><th>No</th><th>Pertanyaan</th><th>Jawaban</th><th>Gambar</th></tr></thead>
+    <thead>
+      <tr><th>No</th><th>Pertanyaan</th><th>Jawaban</th><th>Gambar</th></tr>
+    </thead>
     <tbody id="tblSoal"></tbody>
   </table>
 </div>
 
 </main>
 </div>
+
+<script src="https://cdn.jsdelivr.net/npm/xlsx/dist/xlsx.full.min.js"></script>
 
 <script>
 const API_URL="https://script.google.com/macros/s/AKfycbzhYhmgEliEpmgfyGGeM4iYnQSnLMrPJaRaPfws-wXy36NAXdJ5Z4AbLUDyzliW3Ios_w/exec";
@@ -118,14 +138,14 @@ function showSection(id){
   document.getElementById(id).style.display="block";
 }
 
-/* ✅ DASHBOARD */
+/* DASHBOARD */
 fetch(API_URL+"?action=adminStats")
 .then(r=>r.json()).then(d=>{
   totalProktor.innerText=d.totalProktor;
   pesertaAktif.innerText=d.pesertaAktif;
 });
 
-/* ✅ PROKTOR */
+/* PROKTOR */
 function loadProktor(){
   fetch(API_URL+"?action=getProktor")
   .then(r=>r.json()).then(d=>{
@@ -155,15 +175,39 @@ function importProktor(){
   r.readAsBinaryString(f);
 }
 
-/* ✅ BANK SOAL */
+/* BANK SOAL */
 function loadSoal(){
   fetch(API_URL+"?action=getBankSoal&domain="+domainSoal.value)
   .then(r=>r.json()).then(d=>{
     tblSoal.innerHTML="";
     d.data.forEach((s,i)=>{
-      tblSoal.innerHTML+=`<tr><td>${i+1}</td><td>${s.pertanyaan}</td><td>${s.kunci}</td><td>${s.gambar?'<img src="'+s.gambar+'" width="60">':'-'}</td></tr>`;
+      tblSoal.innerHTML+=`
+      <tr>
+        <td>${i+1}</td>
+        <td>${s.pertanyaan}</td>
+        <td>${s.kunci}</td>
+        <td>${s.gambar?'<img src="'+s.gambar+'" width="60">':'-'}</td>
+      </tr>`;
     });
   });
+}
+
+/* UPLOAD GAMBAR */
+function uploadGambar(){
+  const f=document.getElementById("uploadImg").files[0];
+  if(!f) return alert("Pilih gambar");
+  const r=new FileReader();
+  r.onload=e=>{
+    fetch(API_URL,{method:"POST",body:JSON.stringify({
+      action:"uploadImage",
+      filename:f.name,
+      base64:e.target.result.split(",")[1]
+    })}).then(r=>r.json()).then(j=>{
+      if(j.success) resultImg.value=j.url;
+      else alert("Upload gagal");
+    });
+  };
+  r.readAsDataURL(f);
 }
 
 /* LOGOUT */
