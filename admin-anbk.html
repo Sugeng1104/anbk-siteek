@@ -361,12 +361,24 @@ function kirimGambar(id){
       })
     })
     .then(r=>r.json())
-    .then(()=>{
+    .then(res=>{
       overlay.style.display="none";
+
+      if(!res.success){
+        alert("GAGAL: " + (res.message || "Upload gagal"));
+        console.error(res);
+        return;
+      }
+
       successBox.style.display="block";
       tingSound.play();
       setTimeout(()=>successBox.style.display="none",1200);
-      bukaSoal(); // refresh tabel
+      bukaSoal();
+    })
+    .catch(err=>{
+      overlay.style.display="none";
+      alert("ERROR KONEKSI");
+      console.error(err);
     });
   };
   reader.readAsDataURL(file);
