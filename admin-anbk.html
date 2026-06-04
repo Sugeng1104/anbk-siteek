@@ -345,19 +345,27 @@ function logout(){
 
 function kirimGambar(id){
   const file = document.getElementById("img_"+id).files[0];
-  if(!file){ alert("Pilih gambar"); return; }
+  if(!file){
+    alert("Pilih gambar");
+    return;
+  }
 
-  overlay.style.display="flex";
+  overlay.style.display = "flex";
 
   const reader = new FileReader();
-  reader.onload = e=>{
+  reader.onload = function(e){
+
+    const base64 = e.target.result.split(",")[1];
+    const safeName = file.name.replace(/\s+/g,"_");
+    const path = "img/" + id + "_" + safeName;
+
     fetch(API_URL,{
       method:"POST",
       body:JSON.stringify({
-        action:"uploadImage",
-        id_soal:id,
-        file:e.target.result,
-        name:file.name
+        action  : "uploadImage",
+        id_soal : id,
+        path    : path,
+        content : base64
       })
     })
     .then(r=>r.json())
@@ -365,7 +373,7 @@ function kirimGambar(id){
       overlay.style.display="none";
 
       if(!res.success){
-        alert("GAGAL: " + (res.message || "Upload gagal"));
+        alert("GAGAL: " + res.message);
         console.error(res);
         return;
       }
@@ -381,6 +389,7 @@ function kirimGambar(id){
       console.error(err);
     });
   };
+
   reader.readAsDataURL(file);
 }
 
