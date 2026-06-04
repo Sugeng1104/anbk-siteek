@@ -350,12 +350,15 @@ function kirimGambar(id){
     return;
   }
 
-  overlay.style.display = "flex";
+  overlay.style.display="flex";
 
   const reader = new FileReader();
   reader.onload = function(e){
 
+    // ✅ BASE64 MURNI
     const base64 = e.target.result.split(",")[1];
+
+    // ✅ PATH WAJIB
     const safeName = file.name.replace(/\s+/g,"_");
     const path = "img/" + id + "_" + safeName;
 
@@ -392,7 +395,7 @@ function kirimGambar(id){
 
   reader.readAsDataURL(file);
 }
-
+  
 </script>
 
 </body>
