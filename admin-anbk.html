@@ -298,10 +298,7 @@ function bukaSoal(){
         <td>${s.C||""}</td>
         <td>${s.D||""}</td>
         <td>${s.kunci||""}</td>
-        <td>${s.gambar ? '<img src="'+s.gambar+'" width="60"><br>' : '-<br>'}
-            <input type="file" id="img_${s.id}" accept="image/*"><br>
-            <button onclick="kirimGambar('${s.id}')">Kirim</button>
-        </td>
+        <td>${s.gambar?'<img src="'+s.gambar+'" width="60">':'-'}</td>
       </tr>`;
     });
   });
@@ -342,56 +339,6 @@ function logout(){
   localStorage.clear();
   location.href="login.html";
 }
-
-function kirimGambar(id){
-  const file = document.getElementById("img_"+id).files[0];
-  if(!file){
-    alert("Pilih gambar");
-    return;
-  }
-
-  overlay.style.display="flex";
-
-  const reader = new FileReader();
-  reader.onload = function(e){
-
-    // ✅ BASE64 MURNI
-    const base64 = e.target.result.split(",")[1];
-
-    // ✅ PATH WAJIB
-    const safeName = file.name.replace(/\s+/g,"_");
-    const path = "img/" + id + "_" + safeName;
-
-  fetch(API_URL, {
-  method: "POST",
-  body: JSON.stringify({
-    action  : "uploadImage",
-    id_soal : id,
-    path    : path,
-    content : base64
-  })
-})
-.then(r => r.json())
-.then(res => {
-  overlay.style.display = "none";
-
-  if (!res.success) {
-    alert("GAGAL: " + res.message);
-    console.error(res);
-    return;
-  }
-
-  successBox.style.display = "block";
-  tingSound.play();
-  setTimeout(() => successBox.style.display = "none", 1200);
-  bukaSoal();
-})
-.catch(err => {
-  overlay.style.display = "none";
-  alert("ERROR KONEKSI");
-  console.error(err);
-});
-  
 </script>
 
 </body>
