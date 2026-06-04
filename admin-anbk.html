@@ -362,14 +362,8 @@ function kirimGambar(id){
     const safeName = file.name.replace(/\s+/g,"_");
     const path = "img/" + id + "_" + safeName;
 
-  fetch(API_URL,{
-  method:"POST",
-  mode: "cors",
-  redirect: "follow",
-  headers:{
-    "Content-Type":"application/json",
-    "Accept":"application/json"
-  },
+  fetch(API_URL, {
+  method: "POST",
   body: JSON.stringify({
     action  : "uploadImage",
     id_soal : id,
@@ -377,30 +371,26 @@ function kirimGambar(id){
     content : base64
   })
 })
-    .then(r=>r.json())
-    .then(res=>{
-      overlay.style.display="none";
+.then(r => r.json())
+.then(res => {
+  overlay.style.display = "none";
 
-      if(!res.success){
-        alert("GAGAL: " + res.message);
-        console.error(res);
-        return;
-      }
+  if (!res.success) {
+    alert("GAGAL: " + res.message);
+    console.error(res);
+    return;
+  }
 
-      successBox.style.display="block";
-      tingSound.play();
-      setTimeout(()=>successBox.style.display="none",1200);
-      bukaSoal();
-    })
-    .catch(err=>{
-      overlay.style.display="none";
-      alert("ERROR KONEKSI");
-      console.error(err);
-    });
-  };
-
-  reader.readAsDataURL(file);
-}
+  successBox.style.display = "block";
+  tingSound.play();
+  setTimeout(() => successBox.style.display = "none", 1200);
+  bukaSoal();
+})
+.catch(err => {
+  overlay.style.display = "none";
+  alert("ERROR KONEKSI");
+  console.error(err);
+});
   
 </script>
 
