@@ -384,12 +384,16 @@ const CDN_BASE = "https://cdn.jsdelivr.net/gh/sugeng1104/anbk-siteek@main/img/";
 
 /* render gambar soal */
 function renderGambarSoal(value, idSoal) {
+
+  // jika belum ada gambar
   if (!value || value === "-" || value === "undefined") {
     return `
-      <input type="file" onchange="uploadGambarSoal(this,'${idSoal}')">
-      <button onclick="this.previousElementSibling.click()">Kirim</button>
+      <input type="file" id="file_soal_${idSoal}" accept="image/*">
+      <button type="button" onclick="kirimGambarSoal('${idSoal}')">Kirim</button>
     `;
   }
+
+  // jika sudah ada gambar
   return `<img src="${CDN_BASE + value}" width="60">`;
 }
 
@@ -397,8 +401,8 @@ function renderGambarSoal(value, idSoal) {
 function renderOpsi(value, idSoal, opsi) {
   if (!value) {
     return `
-      <input type="file" onchange="uploadOpsi(this,'${idSoal}','${opsi}')">
-      <button onclick="this.previousElementSibling.click()">Kirim</button>
+      <input type="file" id="file_soal_12" accept="image/*">
+      <button type="button" onclick="kirimGambarSoal('12')">Kirim</button>
     `;
   }
 
@@ -451,16 +455,16 @@ function uploadOpsi(input, idSoal, opsi) {
 
 function kirimGambarSoal(idSoal) {
   const input = document.getElementById("file_soal_" + idSoal);
+
   if (!input || !input.files.length) {
-    alert("Silakan pilih file gambar terlebih dahulu.");
+    alert("❗ Silakan pilih file gambar terlebih dahulu.");
     return;
   }
 
   const file = input.files[0];
 
-  // Validasi sederhana
   if (!file.type.startsWith("image/")) {
-    alert("File harus berupa gambar (jpg / png).");
+    alert("❌ File harus berupa gambar (PNG / JPG).");
     return;
   }
 
@@ -482,7 +486,7 @@ function kirimGambarSoal(idSoal) {
       overlay.style.display = "none";
 
       if (res.success) {
-        alert("✅ Gambar soal berhasil disimpan di GitHub");
+        alert("✅ Gambar berhasil disimpan di GitHub");
         bukaSoal(); // refresh tabel
       } else {
         alert("❌ Upload gagal: " + (res.message || "Tidak diketahui"));
@@ -490,7 +494,7 @@ function kirimGambarSoal(idSoal) {
     })
     .catch(err => {
       overlay.style.display = "none";
-      alert("❌ Upload gagal (network/server error)");
+      alert("❌ Upload gagal (server / jaringan)");
       console.error(err);
     });
   };
