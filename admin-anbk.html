@@ -384,15 +384,12 @@ const CDN_BASE = "https://cdn.jsdelivr.net/gh/sugeng1104/anbk-siteek@main/img/";
 
 /* render gambar soal */
 function renderGambarSoal(value, idSoal) {
-
-  // NORMALISASI NILAI
   if (!value || value === "-" || value === "undefined") {
     return `
       <input type="file" onchange="uploadGambarSoal(this,'${idSoal}')">
       <button onclick="this.previousElementSibling.click()">Kirim</button>
     `;
   }
-
   return `<img src="${CDN_BASE + value}" width="60">`;
 }
 
@@ -452,6 +449,54 @@ function uploadOpsi(input, idSoal, opsi) {
   reader.readAsDataURL(file);
 }
 
+function kirimGambarSoal(idSoal) {
+  const input = document.getElementById("file_soal_" + idSoal);
+  if (!input || !input.files.length) {
+    alert("Silakan pilih file gambar terlebih dahulu.");
+    return;
+  }
+
+  const file = input.files[0];
+
+  // Validasi sederhana
+  if (!file.type.startsWith("image/")) {
+    alert("File harus berupa gambar (jpg / png).");
+    return;
+  }
+
+  overlay.style.display = "flex";
+
+  const reader = new FileReader();
+  reader.onload = e => {
+    fetch(API_URL, {
+      method: "POST",
+      body: JSON.stringify({
+        action: "uploadImage",
+        id_soal: idSoal,
+        path: `img/soal_${idSoal}.png`,
+        content: e.target.result
+      })
+    })
+    .then(r => r.json())
+    .then(res => {
+      overlay.style.display = "none";
+
+      if (res.success) {
+        alert("✅ Gambar soal berhasil disimpan di GitHub");
+        bukaSoal(); // refresh tabel
+      } else {
+        alert("❌ Upload gagal: " + (res.message || "Tidak diketahui"));
+      }
+    })
+    .catch(err => {
+      overlay.style.display = "none";
+      alert("❌ Upload gagal (network/server error)");
+      console.error(err);
+    });
+  };
+
+  reader.readAsDataURL(file);
+}
 </script>
 
 </body>
