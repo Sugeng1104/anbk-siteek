@@ -105,6 +105,42 @@ button:active{transform:scale(.97)}
   display:none;text-align:center;z-index:10000
 }
 .success-box .check{font-size:52px;color:#059669}
+
+/* ================================
+   FIX LEBAR KOLOM OPSI JAWABAN
+   ================================ */
+
+/* Kolom A, B, C, D & Gambar */
+#tblSoal td:nth-child(3),
+#tblSoal td:nth-child(4),
+#tblSoal td:nth-child(5),
+#tblSoal td:nth-child(6),
+#tblSoal td:nth-child(8) {
+  width: 120px;
+  max-width: 120px;
+  word-wrap: break-word;
+  white-space: normal;
+}
+
+/* Input file lebih kecil */
+#tblSoal input[type="file"] {
+  width: 100%;
+  max-width: 110px;
+  font-size: 11px;
+}
+
+/* Button di dalam tabel */
+#tblSoal button {
+  margin-top: 4px;
+  padding: 4px 8px;
+  font-size: 11px;
+}
+
+/* Gambar opsi & soal */
+#tblSoal img {
+  max-width: 80px;
+  height: auto;
+}
 </style>
 </head>
 
