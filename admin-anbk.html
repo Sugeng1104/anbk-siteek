@@ -348,12 +348,15 @@ const CDN_BASE = "https://cdn.jsdelivr.net/gh/sugeng1104/anbk-siteek@main/img/";
 
 /* render gambar soal */
 function renderGambarSoal(value, idSoal) {
-  if (!value) {
+
+  // NORMALISASI NILAI
+  if (!value || value === "-" || value === "undefined") {
     return `
       <input type="file" onchange="uploadGambarSoal(this,'${idSoal}')">
       <button onclick="this.previousElementSibling.click()">Kirim</button>
     `;
   }
+
   return `<img src="${CDN_BASE + value}" width="60">`;
 }
 
