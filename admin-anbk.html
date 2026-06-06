@@ -293,12 +293,12 @@ function bukaSoal(){
       <tr>
         <td>${i+1}</td>
         <td>${s.pertanyaan}</td>
-        <td>${s.A||""}</td>
-        <td>${s.B||""}</td>
-        <td>${s.C||""}</td>
-        <td>${s.D||""}</td>
-        <td>${s.kunci||""}</td>
-        <td>${s.gambar?'<img src="'+s.gambar+'" width="60">':'-'}</td>
+        <td>${renderOpsi(s.A, s.no, "A")}</td>
+        <td>${renderOpsi(s.B, s.no, "B")}</td>
+        <td>${renderOpsi(s.C, s.no, "C")}</td>
+        <td>${renderOpsi(s.D, s.no, "D")}</td>
+        <td>${s.kunci || ""}</td>
+        <td>${renderGambarSoal(s.gambar, s.no)}</td>
       </tr>`;
     });
   });
@@ -339,6 +339,80 @@ function logout(){
   localStorage.clear();
   location.href="login.html";
 }
+
+/* =========================
+   BANK SOAL - IMAGE HANDLER
+   ========================= */
+
+const CDN_BASE = "https://cdn.jsdelivr.net/gh/sugeng1104/anbk-siteek@main/img/";
+
+/* render gambar soal */
+function renderGambarSoal(value, idSoal) {
+  if (!value) {
+    return `
+      <input type="file" onchange="uploadGambarSoal(this,'${idSoal}')">
+      <button onclick="this.previousElementSibling.click()">Kirim</button>
+    `;
+  }
+  return `<img src="${CDN_BASE + value}" width="60">`;
+}
+
+/* render opsi A/B/C/D */
+function renderOpsi(value, idSoal, opsi) {
+  if (!value) {
+    return `
+      <input type="file" onchange="uploadOpsi(this,'${idSoal}','${opsi}')">
+      <button onclick="this.previousElementSibling.click()">Kirim</button>
+    `;
+  }
+
+  if (String(value).endsWith(".png") || String(value).endsWith(".jpg")) {
+    return `<img src="${CDN_BASE + value}" width="60">`;
+  }
+
+  return value;
+}
+
+/* upload gambar soal */
+function uploadGambarSoal(input, idSoal) {
+  const file = input.files[0];
+  if (!file) return;
+
+  const reader = new FileReader();
+  reader.onload = e => {
+    fetch(API_URL, {
+      method: "POST",
+      body: JSON.stringify({
+        action: "uploadImage",
+        id_soal: idSoal,
+        path: `img/soal_${idSoal}.png`,
+        content: e.target.result
+      })
+    }).then(() => bukaSoal());
+  };
+  reader.readAsDataURL(file);
+}
+
+/* upload gambar opsi */
+function uploadOpsi(input, idSoal, opsi) {
+  const file = input.files[0];
+  if (!file) return;
+
+  const reader = new FileReader();
+  reader.onload = e => {
+    fetch(API_URL, {
+      method: "POST",
+      body: JSON.stringify({
+        action: "uploadOpsiGambar",
+        id_soal: idSoal,
+        opsi: opsi,
+        content: e.target.result
+      })
+    }).then(() => bukaSoal());
+  };
+  reader.readAsDataURL(file);
+}
+
 </script>
 
 </body>
