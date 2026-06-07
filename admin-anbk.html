@@ -472,41 +472,26 @@ function kirimGambarSoal(idSoal) {
   reader.onload = e => {
     fetch(API_URL, {
   method: "POST",
+  mode: "no-cors",
   headers: {
     "Content-Type": "application/json"
   },
   body: JSON.stringify({
-    action: "uploadOpsiGambar",
+    action: "uploadImage",
     id_soal: idSoal,
-    opsi: opsi,
+    path: `img/soal_${idSoal}.png`,
     content: e.target.result
   })
 })
-    .then(r => r.text())
-    .then(text => {
-      overlay.style.display = "none";
-
-      let res;
-      try {
-        res = JSON.parse(text);
-      } catch (err) {
-        alert("❌ Response bukan JSON:\n" + text);
-        return;
-      }
-
-      if (res.success) {
-        alert("✅ Gambar berhasil disimpan di GitHub");
-        bukaSoal();
-      } else {
-        alert("❌ Upload gagal:\n" + (res.message || res.error));
-      }
-    })
-    .catch(err => {
-      overlay.style.display = "none";
-      alert("❌ Upload gagal (server / jaringan)");
-      console.error(err);
-    });
-  };
+.then(() => {
+  overlay.style.display = "none";
+  alert("✅ Gambar dikirim ke server (silakan cek hasilnya)");
+  bukaSoal(); // reload via GET
+})
+.catch(() => {
+  overlay.style.display = "none";
+  alert("❌ Gagal mengirim gambar");
+});
 
   reader.readAsDataURL(file);
 }
