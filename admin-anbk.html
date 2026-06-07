@@ -206,11 +206,11 @@ button:active{transform:scale(.97)}
     
     <div style="display: flex; align-items: center; gap: 10px; background: #fff; padding: 6px 14px; border-radius: 20px; border: 1px solid #ddd; box-shadow: 0 2px 4px rgba(0,0,0,0.05);">
       <span style="font-size: 12px; font-weight: bold; color: #4b5563;">Kontrol Massal Lembaga:</span>
+      
       <div id="masterSwitchPeserta" 
-           oncontextmenu="handleMasterSwitch(event, 'Aktif')" 
-           onclick="handleMasterSwitch(event, 'Non-aktif')"
+           onclick="interaksiSaklarMassal(event)"
            style="width: 52px; height: 26px; background: #b00020; border-radius: 13px; position: relative; cursor: pointer; transition: 0.3s; user-select: none;"
-           title="Klik Kanan: AKTIF (Hijau) | Klik Kiri: NON-AKTIF (Merah)">
+           title="Klik untuk Mengubah Status Semua Siswa di Lembaga Terpilih">
         <div id="masterSwitchDot" style="width: 20px; height: 20px; background: #fff; border-radius: 50%; position: absolute; top: 3px; left: 3px; transition: 0.3s; box-shadow: 0 1px 3px rgba(0,0,0,0.3);"></div>
       </div>
       <span id="masterSwitchText" style="font-size: 11px; font-weight: bold; color: #b00020; min-width: 65px; text-transform: uppercase;">OFF</span>
@@ -805,10 +805,22 @@ function importDataPeserta() {
   reader.readAsBinaryString(fileInput.files[0]);
 }
 
-/* === BARU: FUNGSI HANDLER INTERAKSI SAKLAR MASAL PESERTA (KLIK KIRI / KLIK KANAN) === */
-function handleMasterSwitch(event, statusTarget) {
-  event.preventDefault(); // Menghentikan kemunculan menu pop-up klik kanan asli bawaan windows/browser
+/* === PERBAIKAN DI SINI: FUNGSI BARU UNTUK MEMBACA STATE SAKLAR DAN CONVERT TARGET STATUS SECARA DINAMIS DAN CERDAS === */
+function interaksiSaklarMassal(event) {
+  event.preventDefault();
+  
+  const textSekarang = document.getElementById("masterSwitchText").innerText.toUpperCase();
+  
+  // Jika teks sekarang mengandung kata "OFF", artinya target aksi klik admin adalah mengaktifkan ("Aktif")
+  // Sebaliknya jika sudah "ON", target aksi klik admin adalah mematikan ("Non-aktif")
+  const targetStatus = textSekarang.includes("OFF") ? "Aktif" : "Non-aktif";
+  
+  // Oper ke fungsi utama handler kirim data
+  handleMasterSwitch(targetStatus);
+}
 
+/* === PERBAIKAN DI SINI: FUNGSI HANDLER UTAMA UPDATE STATUS MASSAL YANG SUDAH AMAN DAN LINIER === */
+function handleMasterSwitch(statusTarget) {
   const kec = document.getElementById("pesertaFilterKecamatan").value;
   const lemb = document.getElementById("pesertaFilterLembaga").value;
 
