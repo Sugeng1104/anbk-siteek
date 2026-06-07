@@ -467,20 +467,21 @@ function kirimGambarSoal(idSoal) {
     alert("❌ File harus berupa gambar (PNG / JPG).");
     return;
   }
-
   overlay.style.display = "flex";
-
   const reader = new FileReader();
   reader.onload = e => {
     fetch(API_URL, {
-      method: "POST",
-      body: JSON.stringify({
-        action: "uploadImage",
-        id_soal: idSoal,
-        path: `img/soal_${idSoal}.png`,
-        content: e.target.result
-      })
+     method: "POST",
+     headers: {
+     "Content-Type": "application/json"
+    },
+    body: JSON.stringify({
+      action: "uploadImage",
+      id_soal: idSoal,
+      path: `img/soal_${idSoal}.png`,
+      content: e.target.result
     })
+  })
     .then(r => r.text())
     .then(text => {
       overlay.style.display = "none";
