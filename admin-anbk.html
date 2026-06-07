@@ -207,10 +207,10 @@ button:active{transform:scale(.97)}
     <option value="numerasi">Numerasi</option>
   </select>
 
-  <button onclick="toggleTes()">Aktifkan Tes</button>
+  <button id="btnToggleTes" onclick="handleAktivasiTes()">Aktifkan Tes</button>
 
   <div id="indikator" class="indicator">
-    <span class="dot red"></span> Tidak Aktif
+    <span id="indikatorDot" class="dot red"></span> <span id="indikatorText">Tidak Aktif</span>
   </div>
 </div>
 
@@ -310,16 +310,19 @@ function bukaSoal(){
       return;
     }
     d.data.forEach((s,i)=>{
+      // SINKRONISASI NO URUT CADANGAN AMAN
+      const idSistem = (s.no && s.no !== "-") ? s.no : (i + 1);
+
       tblSoal.innerHTML+=`
       <tr>
         <td>${i+1}</td>
         <td>${s.pertanyaan}</td>
-        <td>${renderOpsi(s.A, s.no, "A")}</td>
-        <td>${renderOpsi(s.B, s.no, "B")}</td>
-        <td>${renderOpsi(s.C, s.no, "C")}</td>
-        <td>${renderOpsi(s.D, s.no, "D")}</td>
+        <td>${renderOpsi(s.A, idSistem, "A")}</td>
+        <td>${renderOpsi(s.B, idSistem, "B")}</td>
+        <td>${renderOpsi(s.C, idSistem, "C")}</td>
+        <td>${renderOpsi(s.D, idSistem, "D")}</td>
         <td>${s.kunci || ""}</td>
-        <td>${renderGambarSoal(s.gambar, s.no)}</td>
+        <td>${renderGambarSoal(s.gambar, idSistem)}</td>
       </tr>`;
     });
   });
@@ -347,13 +350,70 @@ function importSoal(){
   r.readAsBinaryString(f);
 }
 
-/* TES */
-let aktif=false;
-function toggleTes(){
-  aktif=!aktif;
-  indikator.innerHTML = aktif
-    ? '<span class="dot green"></span> Aktif'
-    : '<span class="dot red"></span> Tidak Aktif';
+/* === BARU: PERUBAHAN TOTAL LOGIKA TOMBOL AKTIVASI & NON-AKTIFKAN TES DUA ARAH (BERWARNA MERAH/BIRU) === */
+let statusTesAktif = false; 
+
+function handleAktivasiTes() {
+  const domainSelect = document.getElementById("domainSoal");
+  const domainValue = domainSelect.value;
+  const btn = document.getElementById("btnToggleTes");
+  const dot = document.getElementById("indikatorDot");
+  const txt = document.getElementById("indikatorText");
+
+  if (!domainValue) {
+    alert("❗ Silakan pilih Domain Tes terlebih dahulu!");
+    return;
+  }
+
+  const targetStatus = !statusTesAktif ? "Aktif" : "Non-aktif";
+  overlay.style.display = "flex";
+
+  const payload = {
+    action: "setControlTes",
+    domain: domainValue,
+    status: targetStatus
+  };
+
+  fetch(API_URL, {
+    method: "POST",
+    headers: {
+      "Content-Type": "text/plain;charset=utf-8"
+    },
+    body: JSON.stringify(payload)
+  })
+  .then(res => res.json())
+  .then(resData => {
+    overlay.style.display = "none";
+    
+    if (resData.success) {
+      if (targetStatus === "Aktif") {
+        statusTesAktif = true;
+        btn.innerText = "Non-aktifkan";
+        btn.style.backgroundColor = "#b00020"; // Berubah warna menjadi Merah
+        dot.className = "dot green";
+        txt.innerText = `Aktif (${domainValue.toUpperCase()})`;
+        domainSelect.disabled = true; // Kunci select agar domain tidak dirubah saat tes jalan
+      } else {
+        statusTesAktif = false;
+        btn.innerText = "Aktifkan Tes";
+        btn.style.backgroundColor = "#1e3a8a"; // Kembali warna Biru tema asal
+        dot.className = "dot red";
+        txt.innerText = "Tidak Aktif";
+        domainSelect.disabled = false; 
+      }
+
+      successBox.style.display = "block";
+      tingSound.play();
+      setTimeout(() => { successBox.style.display = "none"; }, 1500);
+    } else {
+      alert("❌ Gagal merubah status tes: " + resData.message);
+    }
+  })
+  .catch(err => {
+    overlay.style.display = "none";
+    alert("❌ Terjadi gangguan jaringan.");
+    console.error(err);
+  });
 }
 
 function logout(){
@@ -408,7 +468,6 @@ function kirimGambarSoal(idSoal) {
   const reader = new FileReader();
   
   reader.onload = e => {
-    // Kirim full string base64 murni aman dari limitasi potongan parameter URL
     const fullBase64 = e.target.result;
     const fileExtension = file.name.split('.').pop();
 
@@ -463,7 +522,6 @@ function kirimOpsiGambar(idSoal, opsi) {
   const reader = new FileReader();
   
   reader.onload = e => {
-    // Kirim full string base64 murni aman dari limitasi potongan parameter URL
     const fullBase64 = e.target.result;
 
     const payload = {
