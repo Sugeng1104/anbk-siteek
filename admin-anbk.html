@@ -156,9 +156,12 @@ button:active{transform:scale(.97)}
 <div class="layout">
 <aside>
   <h3>Menu Admin</h3>
-  <a class="active" onclick="showSection('dashboard')">Dashboard</a>
-  <a onclick="showSection('proktor')">Manajemen Proktor</a>
-  <a onclick="showSection('banksoal')">Bank Soal</a>
+  <a class="active" id="menu-dashboard" onclick="switchMenu('dashboard')">Dashboard</a>
+  <a id="menu-proktor" onclick="switchMenu('proktor')">Manajemen Proktor</a>
+  
+  <a id="menu-peserta" onclick="switchMenu('peserta-section')">Manajemen Peserta</a>
+  
+  <a id="menu-banksoal" onclick="switchMenu('banksoal')">Bank Soal</a>
   <a onclick="logout()">Logout</a>
 </aside>
 
@@ -194,6 +197,68 @@ button:active{transform:scale(.97)}
       <tr><th>Email</th><th>Nama</th><th>Lembaga</th><th>Kecamatan</th></tr>
     </thead>
     <tbody id="tblProktor"></tbody>
+  </table>
+</div>
+
+<div id="peserta-section" class="section">
+  <h2>👥 Manajemen Peserta Ujian Massal</h2>
+
+  <div class="control-row" style="background:#f4f6fa; padding:15px; border-radius:8px; border:1px solid #ddd;">
+    <select id="pesertaFilterKecamatan" onchange="updateDropdownLembaga()">
+      <option value="">-- Pilih Kecamatan --</option>
+      <option value="Grati">Grati</option>
+      <option value="Nguling">Nguling</option>
+      <option value="Winongan">Winongan</option>
+      <option value="Lekok">Lekok</option>
+      <option value="Rejoso">Rejoso</option>
+      <option value="Lumbang">Lumbang</option>
+      <option value="Puspo">Puspo</option>
+      <option value="Tosari">Tosari</option>
+      <option value="Gondangwetan">Gondangwetan</option>
+      <option value="Kraton">Kraton</option>
+      <option value="Bangil">Bangil</option>
+      <option value="Gempol">Gempol</option>
+      <option value="Beji">Beji</option>
+      <option value="Pandaan">Pandaan</option>
+      <option value="Prigen">Prigen</option>
+      <option value="Sukorejo">Sukorejo</option>
+      <option value="Wonorejo">Wonorejo</option>
+      <option value="Warungdowo">Warungdowo</option>
+      <option value="Rembang">Rembang</option>
+    </select>
+
+    <select id="pesertaFilterLembaga" style="min-width:180px;">
+      <option value="">-- Pilih Lembaga --</option>
+    </select>
+
+    <button type="button" onclick="loadDataPeserta()">Lihat Data Peserta</button>
+  </div>
+
+  <h3 style="margin-top:25px;">📥 Import Peserta Baru via Excel</h3>
+  <p style="font-size:11px; color:#666; margin:-5px 0 12px 0;">
+    *Ketentuan Skema Kolom: Baris 1 wajib berisi kolom <strong>NPSN</strong>, <strong>Nama Lembaga</strong>, dan <strong>Nama Lengkap</strong>.
+  </p>
+  <div class="control-row">
+    <input type="file" id="excelFilePeserta" accept=".xlsx, .xls">
+    <button type="button" onclick="importDataPeserta()">Buat Peserta</button>
+  </div>
+
+  <table style="margin-top:20px;">
+    <thead>
+      <tr>
+        <th>No</th>
+        <th>Kecamatan</th>
+        <th>NPSN</th>
+        <th>Nama Lembaga</th>
+        <th>Nama Lengkap</th>
+        <th>ID Peserta (Username)</th>
+        <th>Token</th>
+        <th>Status</th>
+      </tr>
+    </thead>
+    <tbody id="tblPeserta">
+      <tr><td colspan="8" style="color:#94a3b8;">Silakan tentukan Kecamatan & Lembaga di atas, lalu klik 'Lihat Data Peserta'.</td></tr>
+    </tbody>
   </table>
 </div>
 
@@ -246,10 +311,21 @@ button:active{transform:scale(.97)}
 const API_URL="https://script.google.com/macros/s/AKfycby37d4-uxGyTsO1PnXDWBFwwU2GzLKN4fvW3txSHRjGDGT9K8J46pttJzIRv5SFzTNAGg/exec";
 adminEmail.innerText=localStorage.getItem("email");
 
-/* MENU */
+/* MENU REFACTORING UTK NAVIGASI AKTIF HIGHLIGHT */
 function showSection(id){
   document.querySelectorAll(".section").forEach(s=>s.style.display="none");
   document.getElementById(id).style.display="block";
+}
+
+/* === BARU: WRAPPER PENGGANTI UTK MANAGEMENT HIGHLIGHT SIDEBAR YANG RAPI === */
+function switchMenu(id) {
+  showSection(id);
+  document.querySelectorAll("aside a").forEach(a => a.classList.remove("active"));
+  
+  if(id === 'dashboard') document.getElementById('menu-dashboard').classList.add('active');
+  if(id === 'proktor') document.getElementById('menu-proktor').classList.add('active');
+  if(id === 'peserta-section') document.getElementById('menu-peserta').classList.add('active');
+  if(id === 'banksoal') document.getElementById('menu-banksoal').classList.add('active');
 }
 
 /* DASHBOARD */
@@ -310,7 +386,6 @@ function bukaSoal(){
       return;
     }
     d.data.forEach((s,i)=>{
-      // SINKRONISASI NO URUT CADANGAN AMAN
       const idSistem = (s.no && s.no !== "-") ? s.no : (i + 1);
 
       tblSoal.innerHTML+=`
@@ -350,7 +425,6 @@ function importSoal(){
   r.readAsBinaryString(f);
 }
 
-/* === BARU: PERUBAHAN TOTAL LOGIKA TOMBOL AKTIVASI & NON-AKTIFKAN TES DUA ARAH (BERWARNA MERAH/BIRU) === */
 let statusTesAktif = false; 
 
 function handleAktivasiTes() {
@@ -389,14 +463,14 @@ function handleAktivasiTes() {
       if (targetStatus === "Aktif") {
         statusTesAktif = true;
         btn.innerText = "Non-aktifkan";
-        btn.style.backgroundColor = "#b00020"; // Berubah warna menjadi Merah
+        btn.style.backgroundColor = "#b00020"; 
         dot.className = "dot green";
         txt.innerText = `Aktif (${domainValue.toUpperCase()})`;
-        domainSelect.disabled = true; // Kunci select agar domain tidak dirubah saat tes jalan
+        domainSelect.disabled = true; 
       } else {
         statusTesAktif = false;
         btn.innerText = "Aktifkan Tes";
-        btn.style.backgroundColor = "#1e3a8a"; // Kembali warna Biru tema asal
+        btn.style.backgroundColor = "#1e3a8a"; 
         dot.className = "dot red";
         txt.innerText = "Tidak Aktif";
         domainSelect.disabled = false; 
@@ -420,10 +494,6 @@ function logout(){
   localStorage.clear();
   location.href="login.html";
 }
-
-/* =======================================
-    REFACTORING: BANK SOAL - IMAGE HANDLER
-   ======================================= */
 
 const CDN_BASE = "https://cdn.jsdelivr.net/gh/sugeng1104/anbk-siteek@main/img/";
 
@@ -450,7 +520,6 @@ function renderOpsi(value, idSoal, opsi) {
   return value;
 }
 
-/* Handler Upload Gambar Soal Utama (JSON MODE MURNI) */
 function kirimGambarSoal(idSoal) {
   const input = document.getElementById(`file_soal_${idSoal}`);
   if (!input || !input.files.length) {
@@ -504,7 +573,6 @@ function kirimGambarSoal(idSoal) {
   reader.readAsDataURL(file);
 }
 
-/* Handler Upload Gambar Opsi A/B/C/D (JSON MODE MURNI) */
 function kirimOpsiGambar(idSoal, opsi) {
   const input = document.getElementById(`file_opsi_${opsi}_${idSoal}`);
   if (!input || !input.files.length) {
@@ -555,6 +623,168 @@ function kirimOpsiGambar(idSoal, opsi) {
     });
   };
   reader.readAsDataURL(file);
+}
+
+
+/* =======================================================================
+   === BARU: ENGINE UTAMA REAKTIF JAVASCRIPT UNTUK FITUR KELOLA PESERTA ===
+   ======================================================================= */
+
+let cacheSemuaLembaga = [];
+
+// Membaca list lembaga unik dari server DB agar dropdown dinamis berelasi dengan kecamatan
+function ambilDaftarLembagaMurni() {
+  fetch(API_URL + "?action=getFilterLembaga")
+    .then(r => r.json())
+    .then(res => {
+      if(res.success) {
+        cacheSemuaLembaga = res.data;
+      }
+    }).catch(e => console.error("Gagal caching list filter lembaga:", e));
+}
+
+// Inisialisasi otomatis list filter lembaga saat halaman pertama kali dibuka
+ambilDaftarLembagaMurni();
+
+// Logika Cascading Dropdown: Perbarui pilihan lembaga berdasarkan kecamatan pilihan admin
+function updateDropdownLembaga() {
+  const kec = document.getElementById("pesertaFilterKecamatan").value;
+  const selectLembaga = document.getElementById("pesertaFilterLembaga");
+  
+  selectLembaga.innerHTML = '<option value="">-- Pilih Lembaga --</option>';
+  
+  if(!kec) return;
+  
+  // Filter array murni lembaga yang terdaftar di bawah kecamatan terpilih
+  const filtered = cacheSemuaLembaga.filter(item => String(item.kecamatan).toLowerCase() === kec.toLowerCase());
+  
+  filtered.forEach(item => {
+    selectLembaga.innerHTML += `<option value="${item.nama_lembaga}">${item.nama_lembaga} (${item.npsn})</option>`;
+  });
+}
+
+// Menarik data peserta spesifik untuk ditampilkan ke dalam tabel
+function loadDataPeserta() {
+  const kec = document.getElementById("pesertaFilterKecamatan").value;
+  const lemb = document.getElementById("pesertaFilterLembaga").value;
+  
+  if(!kec || !lemb) {
+    alert("❗ Silakan tentukan Kecamatan dan Nama Lembaga terlebih dahulu.");
+    return;
+  }
+  
+  overlay.style.display = "flex";
+  
+  fetch(`${API_URL}?action=getPesertaSpesifik&kecamatan=${encodeURIComponent(kec)}&lembaga=${encodeURIComponent(lemb)}`)
+    .then(r => r.json())
+    .then(res => {
+      overlay.style.display = "none";
+      const tbody = document.getElementById("tblPeserta");
+      tbody.innerHTML = "";
+      
+      if(!res.success || !res.data.length) {
+        tbody.innerHTML = "<tr><td colspan='8'>Tidak ditemukan data siswa pada lembaga ini.</td></tr>";
+        return;
+      }
+      
+      res.data.forEach((p, idx) => {
+        tbody.innerHTML += `
+          <tr>
+            <td>${idx + 1}</td>
+            <td>${p.kecamatan}</td>
+            <td>${p.npsn}</td>
+            <td>${p.nama_lembaga}</td>
+            <td>${p.nama_lengkap}</td>
+            <td style="font-family:monospace; font-weight:bold; color:#1e3a8a; font-size:14px;">${p.id_peserta}</td>
+            <td style="font-family:monospace; font-weight:bold; color:#b00020; font-size:14px;">${p.token}</td>
+            <td><span class="dot ${p.status.toLowerCase() === 'selesai' ? 'green' : 'red'}" style="display:inline-block; margin-right:5px;"></span>${p.status}</td>
+          </tr>
+        `;
+      });
+    }).catch(err => {
+      overlay.style.display = "none";
+      alert("❌ Terjadi gangguan jaringan saat memuat data peserta.");
+    });
+}
+
+// Parsing File Excel Kolektif & Post Payload Massal ke Server
+function importDataPeserta() {
+  const kec = document.getElementById("pesertaFilterKecamatan").value;
+  const fileInput = document.getElementById("excelFilePeserta");
+  
+  if(!kec) {
+    alert("❗ Wajib menentukan wilayah Kecamatan pada dropdown filter terlebih dahulu sebelum import!");
+    return;
+  }
+  if(!fileInput.files.length) {
+    alert("❗ Silakan pilih berkas file Excel data siswa.");
+    return;
+  }
+  
+  overlay.style.display = "flex";
+  
+  const reader = new FileReader();
+  reader.onload = function(e) {
+    const dataBinary = e.target.result;
+    const workbook = XLSX.read(dataBinary, { type: 'binary' });
+    const sheetName = workbook.SheetNames[0];
+    const barisDataRaw = XLSX.utils.sheet_to_json(workbook.Sheets[sheetName]);
+    
+    // Verifikasi struktur kolom baris teratas (Header Validation)
+    if(barisDataRaw.length > 0) {
+      const barisPertama = barisDataRaw[0];
+      const keys = Object.keys(barisPertama).map(k => k.toLowerCase().trim());
+      
+      const adaNpsn = keys.includes("npsn");
+      const adaLembaga = keys.includes("nama lembaga") || keys.includes("nama_lembaga");
+      const adaNama = keys.includes("nama lengkap") || keys.includes("nama_lengkap");
+      
+      if(!adaNpsn || !adaLembaga || !adaNama) {
+        overlay.style.display = "none";
+        alert("❌ Skema Excel Tidak Valid! Pastikan baris pertama memiliki judul kolom: 'NPSN', 'Nama Lembaga', dan 'Nama Lengkap'.");
+        return;
+      }
+    } else {
+      overlay.style.display = "none";
+      alert("❌ File Excel kosong atau tidak terdeteksi baris datanya.");
+      return;
+    }
+
+    // Mengirim data JSON murni ke Apps Script Engine
+    fetch(API_URL, {
+      method: "POST",
+      headers: { "Content-Type": "text/plain;charset=utf-8" },
+      body: JSON.stringify({
+        action: "importPesertaBaru",
+        kecamatan: kec,
+        data: barisDataRaw
+      })
+    })
+    .then(r => r.json())
+    .then(res => {
+      overlay.style.display = "none";
+      if(res.success) {
+        // Segarkan database filter list lembaga murni di background
+        ambilDaftarLembagaMurni();
+        
+        successBox.style.display = "block";
+        tingSound.play();
+        setTimeout(() => { 
+          successBox.style.display = "none"; 
+          alert(`✅ Berhasil! Sebanyak ${res.total_dibuat} akun peserta berhasil digenerate otomatis ke database.`);
+        }, 1500);
+        
+        fileInput.value = ""; // Bersihkan file uploader
+      } else {
+        alert("❌ Backend gagal memproses data: " + res.message);
+      }
+    }).catch(err => {
+      overlay.style.display = "none";
+      alert("❌ Gangguan pengiriman paket data ke Google Sheets.");
+    });
+  };
+  
+  reader.readAsBinaryString(fileInput.files[0]);
 }
 </script>
 </body>
