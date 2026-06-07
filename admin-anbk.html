@@ -337,7 +337,7 @@ function importSoal(){
     const data = XLSX.utils.sheet_to_json(wb.Sheets[wb.SheetNames[0]]);
 
     fetch(API_URL,{method:"POST",body:JSON.stringify({action:"importSoal",data})})
-    .then(()=>{
+    .then(() => {
       overlay.style.display="none";
       successBox.style.display="block";
       tingSound.play();
@@ -362,7 +362,7 @@ function logout(){
 }
 
 /* =======================================
-   REFACTORING: BANK SOAL - IMAGE HANDLER
+    REFACTORING: BANK SOAL - IMAGE HANDLER
    ======================================= */
 
 const CDN_BASE = "https://cdn.jsdelivr.net/gh/sugeng1104/anbk-siteek@main/img/";
@@ -390,7 +390,7 @@ function renderOpsi(value, idSoal, opsi) {
   return value;
 }
 
-/* Handler Upload Gambar Soal Utama */
+/* Handler Upload Gambar Soal Utama (JSON MODE MURNI) */
 function kirimGambarSoal(idSoal) {
   const input = document.getElementById(`file_soal_${idSoal}`);
   if (!input || !input.files.length) {
@@ -408,25 +408,28 @@ function kirimGambarSoal(idSoal) {
   const reader = new FileReader();
   
   reader.onload = e => {
-    // Bersihkan prefix base64 data-URI data:image/...;base64,
-    const cleanBase64 = e.target.result.split(",")[1];
+    // Kirim full string base64 murni aman dari limitasi potongan parameter URL
+    const fullBase64 = e.target.result;
     const fileExtension = file.name.split('.').pop();
 
     const payload = {
       action: "uploadImage",
-      id_soal: idSoal,
+      id_soal: String(idSoal),
       path: `img/soal_${idSoal}.${fileExtension}`,
-      content: cleanBase64
+      content: fullBase64
     };
 
     fetch(API_URL, {
       method: "POST",
+      headers: {
+        "Content-Type": "text/plain;charset=utf-8"
+      },
       body: JSON.stringify(payload)
     })
     .then(res => res.json())
     .then(resData => {
       overlay.style.display = "none";
-      if(resData.status === "success") {
+      if(resData.success) {
         alert("✅ Gambar soal berhasil disimpan!");
         bukaSoal();
       } else {
@@ -436,12 +439,13 @@ function kirimGambarSoal(idSoal) {
     .catch(err => {
       overlay.style.display = "none";
       alert("❌ Terjadi kesalahan jaringan.");
+      console.error(err);
     });
   };
   reader.readAsDataURL(file);
 }
 
-/* Handler Upload Gambar Opsi A/B/C/D */
+/* Handler Upload Gambar Opsi A/B/C/D (JSON MODE MURNI) */
 function kirimOpsiGambar(idSoal, opsi) {
   const input = document.getElementById(`file_opsi_${opsi}_${idSoal}`);
   if (!input || !input.files.length) {
@@ -459,25 +463,27 @@ function kirimOpsiGambar(idSoal, opsi) {
   const reader = new FileReader();
   
   reader.onload = e => {
-    const cleanBase64 = e.target.result.split(",")[1];
-    const fileExtension = file.name.split('.').pop();
+    // Kirim full string base64 murni aman dari limitasi potongan parameter URL
+    const fullBase64 = e.target.result;
 
     const payload = {
       action: "uploadOpsiGambar",
-      id_soal: idSoal,
-      opsi: opsi,
-      path: `img/opsi_${opsi}_${idSoal}.${fileExtension}`,
-      content: cleanBase64
+      id_soal: String(idSoal),
+      opsi: String(opsi).toUpperCase(),
+      content: fullBase64
     };
 
     fetch(API_URL, {
       method: "POST",
+      headers: {
+        "Content-Type": "text/plain;charset=utf-8"
+      },
       body: JSON.stringify(payload)
     })
     .then(res => res.json())
     .then(resData => {
       overlay.style.display = "none";
-      if(resData.status === "success") {
+      if(resData.success) {
         alert(`✅ Gambar opsi ${opsi} berhasil disimpan!`);
         bukaSoal();
       } else {
@@ -487,6 +493,7 @@ function kirimOpsiGambar(idSoal, opsi) {
     .catch(err => {
       overlay.style.display = "none";
       alert("❌ Terjadi kesalahan jaringan.");
+      console.error(err);
     });
   };
   reader.readAsDataURL(file);
