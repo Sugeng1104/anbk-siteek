@@ -453,49 +453,6 @@ function uploadOpsi(input, idSoal, opsi) {
   reader.readAsDataURL(file);
 }
 
-function kirimGambarSoal(idSoal) {
-  const input = document.getElementById("file_soal_" + idSoal);
-
-  if (!input || !input.files.length) {
-    alert("❗ Silakan pilih file gambar terlebih dahulu.");
-    return;
-  }
-
-  const file = input.files[0];
-
-  if (!file.type.startsWith("image/")) {
-    alert("❌ File harus berupa gambar (PNG / JPG).");
-    return;
-  }
-  overlay.style.display = "flex";
-  const reader = new FileReader();
-  reader.onload = e => {
-    fetch(API_URL, {
-  method: "POST",
-  mode: "no-cors",                // ✅ PENTING
-  headers: {
-    "Content-Type": "application/json"
-  },
-  body: JSON.stringify({
-    action: "uploadImage",
-    id_soal: idSoal,
-    path: `img/soal_${idSoal}.png`,
-    content: e.target.result
-  })
-})
-.then(() => {
-  overlay.style.display = "none";
-  alert("✅ Gambar berhasil dikirim");
-  bukaSoal();   // ✅ verifikasi via GET
-})
-.catch(() => {
-  overlay.style.display = "none";
-  alert("❌ Gagal mengirim gambar");
-});
-
-  reader.readAsDataURL(file);
-}
-
 function kirimOpsiGambar(idSoal, opsi) {
   const input = document.getElementById(`file_opsi_${opsi}_${idSoal}`);
 
@@ -517,6 +474,10 @@ function kirimOpsiGambar(idSoal, opsi) {
   reader.onload = e => {
     fetch(API_URL, {
       method: "POST",
+      mode: "no-cors",                // ✅ WAJIB
+      headers: {
+        "Content-Type": "application/json"
+      },
       body: JSON.stringify({
         action: "uploadOpsiGambar",
         id_soal: idSoal,
@@ -524,28 +485,14 @@ function kirimOpsiGambar(idSoal, opsi) {
         content: e.target.result
       })
     })
-    .then(r => r.text())
-    .then(text => {
+    .then(() => {
       overlay.style.display = "none";
-
-      let res;
-      try { res = JSON.parse(text); }
-      catch {
-        alert("❌ Response server tidak valid:\n" + text);
-        return;
-      }
-
-      if (res.success) {
-        alert(`✅ Gambar opsi ${opsi} berhasil diunggah`);
-        bukaSoal();
-      } else {
-        alert("❌ Upload gagal: " + (res.message || res.error));
-      }
+      alert(`✅ Gambar opsi ${opsi} berhasil dikirim`);
+      bukaSoal();                     // ✅ verifikasi via GET
     })
-    .catch(err => {
+    .catch(() => {
       overlay.style.display = "none";
-      alert("❌ Upload gagal (server / jaringan)");
-      console.error(err);
+      alert("❌ Gagal mengirim gambar opsi");
     });
   };
 
