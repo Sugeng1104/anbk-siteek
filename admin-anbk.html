@@ -58,12 +58,28 @@ th,td{border:1px solid #ddd;padding:8px;text-align:center;vertical-align:top}
 th{background:#f4f6fa}
 
 /* FORM */
-input,select{padding:6px;font-size:12px}
+input,select,textarea{padding:6px;font-size:12px;width:auto}
+textarea{min-height:70px;width:100%}
 button{
   padding:6px 14px;font-size:12px;border:none;
   border-radius:6px;background:#1e3a8a;color:#fff;
-  cursor:pointer
+  cursor:pointer;transition:.2s
 }
+button:hover{background:#163172;transform:translateY(-1px)}
+button:active{transform:scale(.97)}
+
+/* CONTROL */
+.control-row{
+  display:flex;
+  align-items:center;
+  gap:10px;
+  flex-wrap:wrap;
+  margin-top:12px
+}
+.indicator{display:flex;align-items:center;gap:6px;font-weight:bold}
+.dot{width:10px;height:10px;border-radius:50%}
+.dot.red{background:#b00020}
+.dot.green{background:#059669}
 
 /* LOADING */
 .overlay{
@@ -79,16 +95,52 @@ button{
 }
 @keyframes spin{to{transform:rotate(360deg)}}
 
-/* BATASI LEBAR OPSI */
+/* SUCCESS */
+.success-box{
+  position:fixed;top:50%;left:50%;
+  transform:translate(-50%,-50%);
+  background:#fff;padding:30px 40px;
+  border-radius:14px;
+  box-shadow:0 8px 30px rgba(0,0,0,.25);
+  display:none;text-align:center;z-index:10000
+}
+.success-box .check{font-size:52px;color:#059669}
+
+/* ================================
+   FIX LEBAR KOLOM OPSI JAWABAN
+   ================================ */
+
+/* Kolom A, B, C, D & Gambar */
 #tblSoal td:nth-child(3),
 #tblSoal td:nth-child(4),
 #tblSoal td:nth-child(5),
 #tblSoal td:nth-child(6),
-#tblSoal td:nth-child(8){
-  width:120px;
-  max-width:120px;
+#tblSoal td:nth-child(8) {
+  width: 120px;
+  max-width: 120px;
+  word-wrap: break-word;
+  white-space: normal;
 }
-#tblSoal img{max-width:80px}
+
+/* Input file lebih kecil */
+#tblSoal input[type="file"] {
+  width: 100%;
+  max-width: 110px;
+  font-size: 11px;
+}
+
+/* Button di dalam tabel */
+#tblSoal button {
+  margin-top: 4px;
+  padding: 4px 8px;
+  font-size: 11px;
+}
+
+/* Gambar opsi & soal */
+#tblSoal img {
+  max-width: 80px;
+  height: auto;
+}
 </style>
 </head>
 
@@ -96,9 +148,16 @@ button{
 
 <div class="overlay" id="overlay"><div class="spinner"></div></div>
 
+<div class="success-box" id="successBox">
+  <div class="check">✅</div>
+  <div style="margin-top:10px;font-weight:bold">Import Berhasil</div>
+</div>
+
+<audio id="tingSound" src="https://actions.google.com/sounds/v1/cartoon/clang_and_wobble.ogg"></audio>
+
 <header>
   <h1>ADMIN ANBK – DASHBOARD NASIONAL</h1>
-  <div class="user"><span id="adminEmail"></span> | Admin</div>
+  <div class="user"><span id="adminEmail"></span> | Admin ANBK</div>
 </header>
 
 <div class="layout">
@@ -123,8 +182,26 @@ button{
 <!-- PROKTOR -->
 <div id="proktor" class="section">
   <h2>Manajemen Proktor</h2>
+
+  <input id="filterKecamatan" placeholder="Filter Kecamatan">
+  <button onclick="loadProktor()">Tampilkan</button>
+
+  <h3>Tambah Proktor</h3>
+  <input id="pEmail" placeholder="Email">
+  <input id="pPass" placeholder="Password">
+  <input id="pNama" placeholder="Nama">
+  <input id="pLembaga" placeholder="Kode Lembaga">
+  <input id="pKecamatan" placeholder="Kecamatan">
+  <button onclick="addProktor()">Tambah</button>
+
+  <h3>Import Proktor</h3>
+  <input type="file" id="excelProktor">
+  <button onclick="importProktor()">Import</button>
+
   <table>
-    <thead><tr><th>Email</th><th>Nama</th><th>Lembaga</th><th>Kecamatan</th></tr></thead>
+    <thead>
+      <tr><th>Email</th><th>Nama</th><th>Lembaga</th><th>Kecamatan</th></tr>
+    </thead>
     <tbody id="tblProktor"></tbody>
   </table>
 </div>
@@ -134,12 +211,34 @@ button{
 <h2>📘 Bank Soal ANBK</h2>
 
 <div class="control-row">
+  <select id="domainSoal">
+    <option value="">-- Pilih Domain Tes --</option>
+    <option value="literasi">Literasi</option>
+    <option value="numerasi">Numerasi</option>
+  </select>
+
+  <button onclick="toggleTes()">Aktifkan Tes</button>
+
+  <div id="indikator" class="indicator">
+    <span class="dot red"></span> Tidak Aktif
+  </div>
+</div>
+
+<!-- ✅ BARIS LURUS IMPORT + BUKA -->
+<div class="control-row">
+
+  <input type="file" id="excelSoal" accept=".xlsx">
+
+  <button onclick="importSoal()">Import Soal</button>
+
   <select id="filterDomain">
     <option value="">-- Pilih Domain --</option>
     <option value="literasi">Literasi</option>
     <option value="numerasi">Numerasi</option>
   </select>
+
   <button onclick="bukaSoal()">Buka</button>
+
 </div>
 
 <table>
@@ -147,7 +246,7 @@ button{
 <tr>
   <th>No</th><th>Pertanyaan</th>
   <th>A</th><th>B</th><th>C</th><th>D</th>
-  <th>Jawaban</th><th>Gambar</th>
+  <th>Jawaban</th><th>Gambar Soal</th>
 </tr>
 </thead>
 <tbody id="tblSoal"></tbody>
@@ -157,39 +256,62 @@ button{
 </main>
 </div>
 
+<script src="https://cdn.jsdelivr.net/npm/xlsx/dist/xlsx.full.min.js"></script>
 <script>
-/* ================= CONFIG ================= */
-const API_URL = "PASTE_URL_WEB_APP_APPS_SCRIPT_DI_SINI";
-const CDN = "https://cdn.jsdelivr.net/gh/sugeng1104/anbk-siteek@main/img/";
-adminEmail.innerText = localStorage.getItem("email");
+const API_URL="https://script.google.com/macros/s/AKfycbzhYhmgEliEpmgfyGGeM4iYnQSnLMrPJaRaPfws-wXy36NAXdJ5Z4AbLUDyzliW3Ios_w/exec";
+adminEmail.innerText=localStorage.getItem("email");
 
-/* ================= MENU ================= */
+/* MENU */
 function showSection(id){
   document.querySelectorAll(".section").forEach(s=>s.style.display="none");
   document.getElementById(id).style.display="block";
 }
 
-/* ================= DASHBOARD ================= */
-fetch(API_URL+"?action=adminStats").then(r=>r.json()).then(d=>{
+/* DASHBOARD */
+fetch(API_URL+"?action=adminStats")
+.then(r=>r.json()).then(d=>{
   totalProktor.innerText=d.totalProktor;
   pesertaAktif.innerText=d.pesertaAktif||0;
 });
 
-/* ================= PROKTOR ================= */
-fetch(API_URL+"?action=getProktor").then(r=>r.json()).then(d=>{
-  tblProktor.innerHTML="";
-  d.data.forEach(p=>{
-    tblProktor.innerHTML+=`<tr>
-      <td>${p.email}</td><td>${p.nama}</td>
-      <td>${p.lembaga}</td><td>${p.kecamatan}</td>
-    </tr>`;
+/* PROKTOR */
+function loadProktor(){
+  fetch(API_URL+"?action=getProktor")
+  .then(r=>r.json()).then(d=>{
+    tblProktor.innerHTML="";
+    d.data.forEach(p=>{
+      tblProktor.innerHTML+=`
+      <tr><td>${p.email}</td><td>${p.nama}</td><td>${p.lembaga}</td><td>${p.kecamatan}</td></tr>`;
+    });
   });
-});
+}
+loadProktor();
 
-/* ================= BANK SOAL ================= */
+function addProktor(){
+  fetch(API_URL,{method:"POST",body:JSON.stringify({
+    action:"addProktor",
+    email:pEmail.value,password:pPass.value,
+    nama:pNama.value,kode_lembaga:pLembaga.value,
+    kecamatan:pKecamatan.value
+  })}).then(loadProktor);
+}
+
+function importProktor(){
+  const f=excelProktor.files[0];
+  const r=new FileReader();
+  r.onload=e=>{
+    const wb=XLSX.read(e.target.result,{type:"binary"});
+    const data=XLSX.utils.sheet_to_json(wb.Sheets[wb.SheetNames[0]]);
+    fetch(API_URL,{method:"POST",body:JSON.stringify({action:"importProktor",data})})
+    .then(loadProktor);
+  };
+  r.readAsBinaryString(f);
+}
+
+/* BANK SOAL */
 function bukaSoal(){
   const domain = filterDomain.value;
-  if(!domain){alert("Pilih domain");return;}
+  if(!domain){ alert("Pilih domain"); return; }
 
   overlay.style.display="flex";
 
@@ -198,93 +320,253 @@ function bukaSoal(){
   .then(d=>{
     overlay.style.display="none";
     tblSoal.innerHTML="";
+    if(!d.data.length){
+      tblSoal.innerHTML="<tr><td colspan='8'>Tidak ada soal</td></tr>";
+      return;
+    }
     d.data.forEach((s,i)=>{
       tblSoal.innerHTML+=`
       <tr>
         <td>${i+1}</td>
         <td>${s.pertanyaan}</td>
-        <td>${renderOpsi(s.A,s.no,"A")}</td>
-        <td>${renderOpsi(s.B,s.no,"B")}</td>
-        <td>${renderOpsi(s.C,s.no,"C")}</td>
-        <td>${renderOpsi(s.D,s.no,"D")}</td>
-        <td>${s.kunci}</td>
-        <td>${renderGambar(s.gambar,s.no)}</td>
+        <td>${renderOpsi(s.A, s.no, "A")}</td>
+        <td>${renderOpsi(s.B, s.no, "B")}</td>
+        <td>${renderOpsi(s.C, s.no, "C")}</td>
+        <td>${renderOpsi(s.D, s.no, "D")}</td>
+        <td>${s.kunci || ""}</td>
+        <td>${renderGambarSoal(s.gambar, s.no)}</td>
       </tr>`;
     });
   });
 }
 
-/* ================= RENDER ================= */
-function renderGambar(val,id){
-  if(!val){
-    return `<input type="file" id="file_${id}">
-            <button onclick="uploadSoal(${id})">Kirim</button>`;
-  }
-  return `<img src="${CDN+val}">`;
-}
-function renderOpsi(val,id,o){
-  if(!val){
-    return `<input type="file" id="opsi_${o}_${id}">
-            <button onclick="uploadOpsi(${id},'${o}')">Kirim</button>`;
-  }
-  if(val.endsWith(".png")) return `<img src="${CDN+val}">`;
-  return val;
+function importSoal(){
+  const f = excelSoal.files[0];
+  if(!f){ alert("Pilih file Excel"); return; }
+
+  overlay.style.display="flex";
+
+  const r = new FileReader();
+  r.onload = e=>{
+    const wb = XLSX.read(e.target.result,{type:"binary"});
+    const data = XLSX.utils.sheet_to_json(wb.Sheets[wb.SheetNames[0]]);
+
+    fetch(API_URL,{method:"POST",body:JSON.stringify({action:"importSoal",data})})
+    .then(()=>{
+      overlay.style.display="none";
+      successBox.style.display="block";
+      tingSound.play();
+      setTimeout(()=>{successBox.style.display="none";},1500);
+    });
+  };
+  r.readAsBinaryString(f);
 }
 
-/* ================= BLIND UPLOAD (NO-CORS) ================= */
-function uploadSoal(id){
-  const f=document.getElementById("file_"+id).files[0];
-  if(!f){alert("Pilih file");return;}
-  const r=new FileReader();
-  overlay.style.display="flex";
-  r.onload=e=>{
-    fetch(API_URL,{
-      method:"POST",
-      mode:"no-cors",
-      headers:{"Content-Type":"application/json"},
-      body:JSON.stringify({
-        action:"uploadImage",
-        id_soal:id,
-        path:`img/soal_${id}.png`,
-        content:e.target.result
-      })
-    }).then(()=>{
-      overlay.style.display="none";
-      alert("✅ Gambar dikirim");
-      bukaSoal();
-    });
-  };
-  r.readAsDataURL(f);
-}
-function uploadOpsi(id,o){
-  const f=document.getElementById(`opsi_${o}_${id}`).files[0];
-  if(!f){alert("Pilih file");return;}
-  const r=new FileReader();
-  overlay.style.display="flex";
-  r.onload=e=>{
-    fetch(API_URL,{
-      method:"POST",
-      mode:"no-cors",
-      headers:{"Content-Type":"application/json"},
-      body:JSON.stringify({
-        action:"uploadOpsiGambar",
-        id_soal:id,
-        opsi:o,
-        content:e.target.result
-      })
-    }).then(()=>{
-      overlay.style.display="none";
-      alert("✅ Opsi dikirim");
-      bukaSoal();
-    });
-  };
-  r.readAsDataURL(f);
+/* TES */
+let aktif=false;
+function toggleTes(){
+  aktif=!aktif;
+  indikator.innerHTML = aktif
+    ? '<span class="dot green"></span> Aktif'
+    : '<span class="dot red"></span> Tidak Aktif';
 }
 
 function logout(){
   localStorage.clear();
   location.href="login.html";
 }
+
+/* =========================
+   BANK SOAL - IMAGE HANDLER
+   ========================= */
+
+const CDN_BASE = "https://cdn.jsdelivr.net/gh/sugeng1104/anbk-siteek@main/img/";
+
+/* render gambar soal */
+function renderGambarSoal(value, idSoal) {
+
+  // jika belum ada gambar
+  if (!value || value === "-" || value === "undefined") {
+    return `
+      <input type="file" id="file_soal_${idSoal}" accept="image/*">
+      <button type="button" onclick="kirimGambarSoal('${idSoal}')">Kirim</button>
+    `;
+  }
+
+  // jika sudah ada gambar
+  return `<img src="${CDN_BASE + value}" width="60">`;
+}
+
+/* render opsi A/B/C/D */
+function renderOpsi(value, idSoal, opsi) {
+  if (!value) {
+    return `
+      <input type="file" id="file_opsi_${opsi}_${idSoal}" accept="image/*">
+      <button type="button" onclick="kirimOpsiGambar('${idSoal}','${opsi}')">Kirim</button>
+    `;
+  }
+
+  if (String(value).endsWith(".png") || String(value).endsWith(".jpg")) {
+    return `<img src="${CDN_BASE + value}" width="60">`;
+  }
+
+  return value;
+}
+
+/* upload gambar soal */
+function uploadGambarSoal(input, idSoal) {
+  const file = input.files[0];
+  if (!file) return;
+
+  const reader = new FileReader();
+  reader.onload = e => {
+    fetch(API_URL, {
+      method: "POST",
+      body: JSON.stringify({
+        action: "uploadImage",
+        id_soal: idSoal,
+        path: `img/soal_${idSoal}.png`,
+        content: e.target.result
+      })
+    }).then(() => bukaSoal());
+  };
+  reader.readAsDataURL(file);
+}
+
+/* upload gambar opsi */
+function uploadOpsi(input, idSoal, opsi) {
+  const file = input.files[0];
+  if (!file) return;
+
+  const reader = new FileReader();
+  reader.onload = e => {
+    fetch(API_URL, {
+      method: "POST",
+      body: JSON.stringify({
+        action: "uploadOpsiGambar",
+        id_soal: idSoal,
+        opsi: opsi,
+        content: e.target.result
+      })
+    }).then(() => bukaSoal());
+  };
+  reader.readAsDataURL(file);
+}
+
+function kirimGambarSoal(idSoal) {
+  const input = document.getElementById("file_soal_" + idSoal);
+
+  if (!input || !input.files.length) {
+    alert("❗ Silakan pilih file gambar terlebih dahulu.");
+    return;
+  }
+
+  const file = input.files[0];
+
+  if (!file.type.startsWith("image/")) {
+    alert("❌ File harus berupa gambar (PNG / JPG).");
+    return;
+  }
+  overlay.style.display = "flex";
+  const reader = new FileReader();
+  reader.onload = e => {
+    fetch(API_URL, {
+     method: "POST",
+     headers: {
+     "Content-Type": "application/json"
+    },
+    body: JSON.stringify({
+      action: "uploadImage",
+      id_soal: idSoal,
+      path: `img/soal_${idSoal}.png`,
+      content: e.target.result
+    })
+  })
+    .then(r => r.text())
+    .then(text => {
+      overlay.style.display = "none";
+
+      let res;
+      try {
+        res = JSON.parse(text);
+      } catch (err) {
+        alert("❌ Response bukan JSON:\n" + text);
+        return;
+      }
+
+      if (res.success) {
+        alert("✅ Gambar berhasil disimpan di GitHub");
+        bukaSoal();
+      } else {
+        alert("❌ Upload gagal:\n" + (res.message || res.error));
+      }
+    })
+    .catch(err => {
+      overlay.style.display = "none";
+      alert("❌ Upload gagal (server / jaringan)");
+      console.error(err);
+    });
+  };
+
+  reader.readAsDataURL(file);
+}
+
+function kirimOpsiGambar(idSoal, opsi) {
+  const input = document.getElementById(`file_opsi_${opsi}_${idSoal}`);
+
+  if (!input || !input.files.length) {
+    alert("❗ Pilih file gambar opsi terlebih dahulu.");
+    return;
+  }
+
+  const file = input.files[0];
+
+  if (!file.type.startsWith("image/")) {
+    alert("❌ File harus berupa gambar.");
+    return;
+  }
+
+  overlay.style.display = "flex";
+
+  const reader = new FileReader();
+  reader.onload = e => {
+    fetch(API_URL, {
+      method: "POST",
+      body: JSON.stringify({
+        action: "uploadOpsiGambar",
+        id_soal: idSoal,
+        opsi: opsi,
+        content: e.target.result
+      })
+    })
+    .then(r => r.text())
+    .then(text => {
+      overlay.style.display = "none";
+
+      let res;
+      try { res = JSON.parse(text); }
+      catch {
+        alert("❌ Response server tidak valid:\n" + text);
+        return;
+      }
+
+      if (res.success) {
+        alert(`✅ Gambar opsi ${opsi} berhasil diunggah`);
+        bukaSoal();
+      } else {
+        alert("❌ Upload gagal: " + (res.message || res.error));
+      }
+    })
+    .catch(err => {
+      overlay.style.display = "none";
+      alert("❌ Upload gagal (server / jaringan)");
+      console.error(err);
+    });
+  };
+
+  reader.readAsDataURL(file);
+}
 </script>
+
 </body>
 </html>
