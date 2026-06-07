@@ -472,23 +472,23 @@ function kirimOpsiGambar(idSoal, opsi) {
 
   const reader = new FileReader();
   reader.onload = e => {
+
+    // ✅ WAJIB FormData
+    const form = new FormData();
+    form.append("action", "uploadOpsiGambar");
+    form.append("id_soal", idSoal);
+    form.append("opsi", opsi);
+    form.append("content", e.target.result);
+
     fetch(API_URL, {
       method: "POST",
-      mode: "no-cors",                // ✅ WAJIB
-      headers: {
-        "Content-Type": "application/json"
-      },
-      body: JSON.stringify({
-        action: "uploadOpsiGambar",
-        id_soal: idSoal,
-        opsi: opsi,
-        content: e.target.result
-      })
+      mode: "no-cors",
+      body: form
     })
     .then(() => {
       overlay.style.display = "none";
       alert(`✅ Gambar opsi ${opsi} berhasil dikirim`);
-      bukaSoal();                     // ✅ verifikasi via GET
+      bukaSoal(); // verifikasi via GET
     })
     .catch(() => {
       overlay.style.display = "none";
@@ -498,6 +498,7 @@ function kirimOpsiGambar(idSoal, opsi) {
 
   reader.readAsDataURL(file);
 }
+  
 </script>
 
 </body>
