@@ -106,11 +106,7 @@ button:active{transform:scale(.97)}
 }
 .success-box .check{font-size:52px;color:#059669}
 
-/* ================================
-   FIX LEBAR KOLOM OPSI JAWABAN
-   ================================ */
-
-/* Kolom A, B, C, D & Gambar */
+/* FIX LEBAR KOLOM OPSI JAWABAN */
 #tblSoal td:nth-child(3),
 #tblSoal td:nth-child(4),
 #tblSoal td:nth-child(5),
@@ -122,21 +118,18 @@ button:active{transform:scale(.97)}
   white-space: normal;
 }
 
-/* Input file lebih kecil */
 #tblSoal input[type="file"] {
   width: 100%;
   max-width: 110px;
   font-size: 11px;
 }
 
-/* Button di dalam tabel */
 #tblSoal button {
   margin-top: 4px;
   padding: 4px 8px;
   font-size: 11px;
 }
 
-/* Gambar opsi & soal */
 #tblSoal img {
   max-width: 80px;
   height: auto;
@@ -150,7 +143,7 @@ button:active{transform:scale(.97)}
 
 <div class="success-box" id="successBox">
   <div class="check">✅</div>
-  <div style="margin-top:10px;font-weight:bold">Import Berhasil</div>
+  <div style="margin-top:10px;font-weight:bold">Proses Berhasil</div>
 </div>
 
 <audio id="tingSound" src="https://actions.google.com/sounds/v1/cartoon/clang_and_wobble.ogg"></audio>
@@ -171,7 +164,6 @@ button:active{transform:scale(.97)}
 
 <main>
 
-<!-- DASHBOARD -->
 <div id="dashboard" class="section" style="display:block">
   <div class="cards">
     <div class="card"><h4>Total Proktor</h4><div class="value" id="totalProktor">-</div></div>
@@ -179,7 +171,6 @@ button:active{transform:scale(.97)}
   </div>
 </div>
 
-<!-- PROKTOR -->
 <div id="proktor" class="section">
   <h2>Manajemen Proktor</h2>
 
@@ -206,7 +197,6 @@ button:active{transform:scale(.97)}
   </table>
 </div>
 
-<!-- BANK SOAL -->
 <div id="banksoal" class="section">
 <h2>📘 Bank Soal ANBK</h2>
 
@@ -224,11 +214,8 @@ button:active{transform:scale(.97)}
   </div>
 </div>
 
-<!-- ✅ BARIS LURUS IMPORT + BUKA -->
 <div class="control-row">
-
   <input type="file" id="excelSoal" accept=".xlsx">
-
   <button onclick="importSoal()">Import Soal</button>
 
   <select id="filterDomain">
@@ -236,9 +223,7 @@ button:active{transform:scale(.97)}
     <option value="literasi">Literasi</option>
     <option value="numerasi">Numerasi</option>
   </select>
-
   <button onclick="bukaSoal()">Buka</button>
-
 </div>
 
 <table>
@@ -376,130 +361,136 @@ function logout(){
   location.href="login.html";
 }
 
-/* =========================
-   BANK SOAL - IMAGE HANDLER
-   ========================= */
+/* =======================================
+   REFACTORING: BANK SOAL - IMAGE HANDLER
+   ======================================= */
 
 const CDN_BASE = "https://cdn.jsdelivr.net/gh/sugeng1104/anbk-siteek@main/img/";
 
-/* render gambar soal */
 function renderGambarSoal(value, idSoal) {
-
-  // jika belum ada gambar
   if (!value || value === "-" || value === "undefined") {
     return `
       <input type="file" id="file_soal_${idSoal}" accept="image/*">
       <button type="button" onclick="kirimGambarSoal('${idSoal}')">Kirim</button>
     `;
   }
-
-  // jika sudah ada gambar
-  return `<img src="${CDN_BASE + value}" width="60">`;
+  return `<img src="${value.startsWith('http') ? value : CDN_BASE + value}" width="60">`;
 }
 
-/* render opsi A/B/C/D */
 function renderOpsi(value, idSoal, opsi) {
-  if (!value) {
+  if (!value || value === "-") {
     return `
       <input type="file" id="file_opsi_${opsi}_${idSoal}" accept="image/*">
       <button type="button" onclick="kirimOpsiGambar('${idSoal}','${opsi}')">Kirim</button>
     `;
   }
-
-  if (String(value).endsWith(".png") || String(value).endsWith(".jpg")) {
-    return `<img src="${CDN_BASE + value}" width="60">`;
+  if (String(value).endsWith(".png") || String(value).endsWith(".jpg") || String(value).startsWith("http")) {
+    return `<img src="${String(value).startsWith('http') ? value : CDN_BASE + value}" width="60">`;
   }
-
   return value;
 }
 
-/* upload gambar soal */
-function uploadGambarSoal(input, idSoal) {
-  const file = input.files[0];
-  if (!file) return;
-
-  const reader = new FileReader();
-  reader.onload = e => {
-    fetch(API_URL, {
-      method: "POST",
-      body: JSON.stringify({
-        action: "uploadImage",
-        id_soal: idSoal,
-        path: `img/soal_${idSoal}.png`,
-        content: e.target.result
-      })
-    }).then(() => bukaSoal());
-  };
-  reader.readAsDataURL(file);
-}
-
-/* upload gambar opsi */
-function uploadOpsi(input, idSoal, opsi) {
-  const file = input.files[0];
-  if (!file) return;
-
-  const reader = new FileReader();
-  reader.onload = e => {
-    fetch(API_URL, {
-      method: "POST",
-      body: JSON.stringify({
-        action: "uploadOpsiGambar",
-        id_soal: idSoal,
-        opsi: opsi,
-        content: e.target.result
-      })
-    }).then(() => bukaSoal());
-  };
-  reader.readAsDataURL(file);
-}
-
-function kirimOpsiGambar(idSoal, opsi) {
-  const input = document.getElementById(`file_opsi_${opsi}_${idSoal}`);
-
+/* Handler Upload Gambar Soal Utama */
+function kirimGambarSoal(idSoal) {
+  const input = document.getElementById(`file_soal_${idSoal}`);
   if (!input || !input.files.length) {
-    alert("❗ Pilih file gambar opsi terlebih dahulu.");
+    alert("❗ Pilih file gambar soal terlebih dahulu.");
     return;
   }
-
+  
   const file = input.files[0];
-
   if (!file.type.startsWith("image/")) {
     alert("❌ File harus berupa gambar.");
     return;
   }
 
   overlay.style.display = "flex";
-
   const reader = new FileReader();
+  
   reader.onload = e => {
+    // Bersihkan prefix base64 data-URI data:image/...;base64,
+    const cleanBase64 = e.target.result.split(",")[1];
+    const fileExtension = file.name.split('.').pop();
 
-    // ✅ WAJIB FormData
-    const form = new FormData();
-    form.append("action", "uploadOpsiGambar");
-    form.append("id_soal", idSoal);
-    form.append("opsi", opsi);
-    form.append("content", e.target.result);
+    const payload = {
+      action: "uploadImage",
+      id_soal: idSoal,
+      path: `img/soal_${idSoal}.${fileExtension}`,
+      content: cleanBase64
+    };
 
     fetch(API_URL, {
       method: "POST",
-      mode: "no-cors",
-      body: form
+      body: JSON.stringify(payload)
     })
-    .then(() => {
+    .then(res => res.json())
+    .then(resData => {
       overlay.style.display = "none";
-      alert(`✅ Gambar opsi ${opsi} berhasil dikirim`);
-      bukaSoal(); // verifikasi via GET
+      if(resData.status === "success") {
+        alert("✅ Gambar soal berhasil disimpan!");
+        bukaSoal();
+      } else {
+        alert("❌ Gagal: " + resData.message);
+      }
     })
-    .catch(() => {
+    .catch(err => {
       overlay.style.display = "none";
-      alert("❌ Gagal mengirim gambar opsi");
+      alert("❌ Terjadi kesalahan jaringan.");
     });
   };
-
   reader.readAsDataURL(file);
 }
-  
-</script>
 
+/* Handler Upload Gambar Opsi A/B/C/D */
+function kirimOpsiGambar(idSoal, opsi) {
+  const input = document.getElementById(`file_opsi_${opsi}_${idSoal}`);
+  if (!input || !input.files.length) {
+    alert("❗ Pilih file gambar opsi terlebih dahulu.");
+    return;
+  }
+
+  const file = input.files[0];
+  if (!file.type.startsWith("image/")) {
+    alert("❌ File harus berupa gambar.");
+    return;
+  }
+
+  overlay.style.display = "flex";
+  const reader = new FileReader();
+  
+  reader.onload = e => {
+    const cleanBase64 = e.target.result.split(",")[1];
+    const fileExtension = file.name.split('.').pop();
+
+    const payload = {
+      action: "uploadOpsiGambar",
+      id_soal: idSoal,
+      opsi: opsi,
+      path: `img/opsi_${opsi}_${idSoal}.${fileExtension}`,
+      content: cleanBase64
+    };
+
+    fetch(API_URL, {
+      method: "POST",
+      body: JSON.stringify(payload)
+    })
+    .then(res => res.json())
+    .then(resData => {
+      overlay.style.display = "none";
+      if(resData.status === "success") {
+        alert(`✅ Gambar opsi ${opsi} berhasil disimpan!`);
+        bukaSoal();
+      } else {
+        alert("❌ Gagal: " + resData.message);
+      }
+    })
+    .catch(err => {
+      overlay.style.display = "none";
+      alert("❌ Terjadi kesalahan jaringan.");
+    });
+  };
+  reader.readAsDataURL(file);
+}
+</script>
 </body>
 </html>
