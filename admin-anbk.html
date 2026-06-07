@@ -401,8 +401,8 @@ function renderGambarSoal(value, idSoal) {
 function renderOpsi(value, idSoal, opsi) {
   if (!value) {
     return `
-      <input type="file" id="file_soal_12" accept="image/*">
-      <button type="button" onclick="kirimGambarSoal('12')">Kirim</button>
+      <input type="file" id="file_opsi_${opsi}_${idSoal}" accept="image/*">
+      <button type="button" onclick="kirimOpsiGambar('${idSoal}','${opsi}')">Kirim</button>
     `;
   }
 
@@ -499,6 +499,62 @@ function kirimGambarSoal(idSoal) {
      alert("❌ Upload gagal:\n" + (res.message || res.error));
      }
  })
+
+  reader.readAsDataURL(file);
+}
+
+function kirimOpsiGambar(idSoal, opsi) {
+  const input = document.getElementById(`file_opsi_${opsi}_${idSoal}`);
+
+  if (!input || !input.files.length) {
+    alert("❗ Pilih file gambar opsi terlebih dahulu.");
+    return;
+  }
+
+  const file = input.files[0];
+
+  if (!file.type.startsWith("image/")) {
+    alert("❌ File harus berupa gambar.");
+    return;
+  }
+
+  overlay.style.display = "flex";
+
+  const reader = new FileReader();
+  reader.onload = e => {
+    fetch(API_URL, {
+      method: "POST",
+      body: JSON.stringify({
+        action: "uploadOpsiGambar",
+        id_soal: idSoal,
+        opsi: opsi,
+        content: e.target.result
+      })
+    })
+    .then(r => r.text())
+    .then(text => {
+      overlay.style.display = "none";
+
+      let res;
+      try { res = JSON.parse(text); }
+      catch {
+        alert("❌ Response server tidak valid:\n" + text);
+        return;
+      }
+
+      if (res.success) {
+        alert(`✅ Gambar opsi ${opsi} berhasil diunggah`);
+        bukaSoal();
+      } else {
+        alert("❌ Upload gagal: " + (res.message || res.error));
+      }
+    })
+    .catch(err => {
+      overlay.style.display = "none";
+      alert("❌ Upload gagal (server / jaringan)");
+      console.error(err);
+    });
+  };
 
   reader.readAsDataURL(file);
 }
