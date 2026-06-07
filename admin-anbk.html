@@ -481,23 +481,24 @@ function kirimGambarSoal(idSoal) {
         content: e.target.result
       })
     })
-    .then(r => r.json())
-    .then(res => {
-      overlay.style.display = "none";
+    .then(r => r.text())
+    .then(text => {
+     overlay.style.display = "none";
+     let res;
+     try {
+     res = JSON.parse(text);
+     } catch (e) {
+     alert("❌ Response bukan JSON:\n" + text);
+     return;
+     }
 
-      if (res.success) {
-        alert("✅ Gambar berhasil disimpan di GitHub");
-        bukaSoal(); // refresh tabel
-      } else {
-        alert("❌ Upload gagal: " + (res.message || "Tidak diketahui"));
-      }
-    })
-    .catch(err => {
-      overlay.style.display = "none";
-      alert("❌ Upload gagal (server / jaringan)");
-      console.error(err);
-    });
-  };
+     if (res.success) {
+     alert("✅ Gambar berhasil disimpan di GitHub");
+     bukaSoal();
+     } else {
+     alert("❌ Upload gagal:\n" + (res.message || res.error));
+     }
+ })
 
   reader.readAsDataURL(file);
 }
